@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Columns2, LayoutPanelLeft, Layers, Sparkles, Cpu, Search, Zap, CheckCircle2, ChevronRight, XCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import { MULTI_DESIGNS } from '../../data/mockData';
+import { startDesignSession, answerDesignQuestions } from '../../lib/api';
 import WorkspaceInput from './WorkspaceInput';
 import DesignCard from './DesignCard';
 import InsightsPanel from './InsightsPanel';
@@ -24,6 +25,9 @@ export default function ChatApp() {
   const [panelWidth, setPanelWidth] = useState(340);
   const [isResizing, setIsResizing] = useState(false);
   const [isInsightsManualOpen, setIsInsightsManualOpen] = useState(true);
+  const [sessionId, setSessionId] = useState(null);
+  const [dynamicQuestions, setDynamicQuestions] = useState([]);
+  const [dynamicDesign, setDynamicDesign] = useState(null);
 
   const startResizing = useCallback((e) => {
     e.preventDefault();
@@ -77,18 +81,37 @@ export default function ChatApp() {
     }
   ];
 
-  const activeDesign = MULTI_DESIGNS.find(d => d.id === activeTabId);
+  const activeDesign = dynamicDesign || MULTI_DESIGNS.find(d => d.id === activeTabId);
 
-  const handleStartClarification = (text) => {
+  const handleStartClarification = async (text) => {
     if (!text.trim()) return;
     setPrompt(text);
-    setStep('CLARIFY');
-    setCurrentQuestionIndex(0);
+    setStep('GENERATING');
+    console.log("[Frontend] Preparing to start design session...");
+    console.log("[Frontend] Prompt:", text);
+    try {
+      console.log("[Frontend] -> POST /design/start (Awaiting Gemini Clarification Questions)...");
+      const res = await startDesignSession(text);
+      console.log("[Frontend] <- Received Clarification Questions:", res.questions);
+      setSessionId(res.session_id);
+      setDynamicQuestions(res.questions.map((q, idx) => ({
+        id: `q${idx}`,
+        question: q,
+        options: ['Yes', 'No', 'Medium scale', 'High availability required'] 
+      })));
+      setStep('CLARIFY');
+      setCurrentQuestionIndex(0);
+    } catch(err) {
+      console.error(err);
+      setStep('IDLE');
+    }
   };
 
+  const currentQuestionsList = dynamicQuestions.length > 0 ? dynamicQuestions : CLARIFICATION_QUESTIONS;
+
   const handleAnswer = (option) => {
-    setAnswers(prev => ({ ...prev, [CLARIFICATION_QUESTIONS[currentQuestionIndex].id]: option }));
-    if (currentQuestionIndex < CLARIFICATION_QUESTIONS.length - 1) {
+    setAnswers(prev => ({ ...prev, [currentQuestionsList[currentQuestionIndex].id]: option }));
+    if (currentQuestionIndex < currentQuestionsList.length - 1) {
       setCurrentQuestionIndex(idx => idx + 1);
     } else {
       handleFinalGenerate();
@@ -97,11 +120,47 @@ export default function ChatApp() {
 
   const handleFinalGenerate = async () => {
     setStep('GENERATING');
-    await new Promise(r => setTimeout(r, 2200));
-    setStep('RESULTS');
-    setActiveTabId('scalable');
-    setIsComparison(false);
-    setIsInsightsManualOpen(true); // Auto-open when new results arrive
+    console.log("[Frontend] All questions answered!");
+    console.log("[Frontend] Session ID:", sessionId);
+    console.log("[Frontend] Answers:", answers);
+    try {
+      console.log("[Frontend] -> POST /design/answer (Awaiting full Gemini Architecture Generation - This may take 15-30 seconds)...");
+      const res = await answerDesignQuestions(sessionId, answers);
+      console.log("[Frontend] <- SUCCESS! Full Architecture Payload Received:");
+      console.log(res);
+      const newDesign = {
+        id: res.design_id,
+        label: 'Gemini AI',
+        name: 'Calculated Architecture',
+        badge: 'AI Generated',
+        badgeColor: 'purple',
+        summary: res.architecture.scalability_notes + " " + res.architecture.security_notes,
+        components: res.architecture.components.map(c => ({
+          name: c.name, role: c.purpose, tech: c.type
+        })),
+        techStack: [res.architecture.tech_stack?.frontend, res.architecture.tech_stack?.backend, res.architecture.tech_stack?.database].filter(Boolean),
+        pros: ['Intelligent logic', 'Auto-validated'],
+        cons: ['Generated context'],
+        scores: { 
+          scalability: res.validation?.scalability_score || 85, 
+          performance: 90, 
+          security: res.validation?.security_score || 80, 
+          reliability: 88, 
+          maintainability: 85 
+        },
+        diagram: res.mermaid,
+        validation: res.validation,
+        cost: res.cost
+      };
+      setDynamicDesign(newDesign);
+      setActiveTabId(res.design_id);
+      setStep('RESULTS');
+      setIsComparison(false);
+      setIsInsightsManualOpen(true);
+    } catch(err) {
+      console.error(err);
+      setStep('IDLE');
+    }
   };
 
   const handleSkip = () => {
@@ -142,16 +201,27 @@ export default function ChatApp() {
           {/* ── Tab Bar (only when designs exist) ── */}
           {step === 'RESULTS' && (
             <div className="ws-tabbar">
-              {MULTI_DESIGNS.map(d => (
+              {dynamicDesign ? (
                 <button
-                  key={d.id}
-                  className={`ws-tab ${!isComparison && activeTabId === d.id ? 'active' : ''}`}
-                  onClick={() => { setActiveTabId(d.id); setIsComparison(false); }}
+                  key={dynamicDesign.id}
+                  className={`ws-tab active`}
+                  onClick={() => setIsComparison(false)}
                 >
-                  {d.label}
-                  <span className="ws-tab-badge">{d.badge}</span>
+                  {dynamicDesign.label}
+                  <span className="ws-tab-badge">{dynamicDesign.badge}</span>
                 </button>
-              ))}
+              ) : (
+                MULTI_DESIGNS.map(d => (
+                  <button
+                    key={d.id}
+                    className={`ws-tab ${!isComparison && activeTabId === d.id ? 'active' : ''}`}
+                    onClick={() => { setActiveTabId(d.id); setIsComparison(false); }}
+                  >
+                    {d.label}
+                    <span className="ws-tab-badge">{d.badge}</span>
+                  </button>
+                ))
+              )}
 
               <div style={{ marginLeft: 'auto' }}>
                 <button
@@ -224,20 +294,20 @@ export default function ChatApp() {
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%', maxWidth: '500px' }}>
                         <div className="ws-progress-indicator">
-                          <span>Step {currentQuestionIndex + 1} of {CLARIFICATION_QUESTIONS.length}</span>
+                          <span>Step {currentQuestionIndex + 1} of {currentQuestionsList.length}</span>
                           <div className="ws-progress-dots">
-                             {CLARIFICATION_QUESTIONS.map((_, i) => (
+                             {currentQuestionsList.map((_, i) => (
                                <div key={i} className={`ws-progress-dot ${i <= currentQuestionIndex ? 'active' : ''}`} />
                              ))}
                           </div>
                         </div>
 
                         <h2 className="ws-empty-title" style={{ fontSize: '1.5rem', minHeight: '60px' }}>
-                          {CLARIFICATION_QUESTIONS[currentQuestionIndex].question}
+                          {currentQuestionsList[currentQuestionIndex].question}
                         </h2>
 
                         <div className="ws-example-prompts" style={{ gap: '12px' }}>
-                          {CLARIFICATION_QUESTIONS[currentQuestionIndex].options.map((opt, i) => (
+                          {currentQuestionsList[currentQuestionIndex].options.map((opt, i) => (
                             <button
                               key={i}
                               className="ws-example-chip"
