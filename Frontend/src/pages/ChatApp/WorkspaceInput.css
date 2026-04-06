@@ -1,0 +1,107 @@
+/* ── WorkspaceInput ────────────────────────────────── */
+.ws-input-bar {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-ultra-subtle);
+  background: rgba(8, 8, 13, 0.6);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.ws-input-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ws-input-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.ws-input-field {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.875rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+  line-height: 1.5;
+}
+
+.ws-input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.ws-input-field:focus {
+  border-color: var(--border-accent);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 3px var(--accent-halo);
+}
+
+.ws-input-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ws-generate-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--gradient-primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.875rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+  box-shadow: var(--shadow-accent);
+}
+
+.ws-generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ws-generate-btn.generating {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  color: var(--accent-bright);
+  box-shadow: none;
+}
+
+.ws-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border-subtle);
+  overflow: hidden;
+}
+
+.ws-progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  animation: ws-progress 2.5s ease-in-out infinite;
+}
+
+@keyframes ws-progress {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
