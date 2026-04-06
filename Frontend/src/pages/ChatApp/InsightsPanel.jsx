@@ -65,6 +65,17 @@ export default function InsightsPanel({ design }) {
   if (!design) return null; // Let the toggle handle empty states
 
   const scores = design.scores;
+  const valIssues = design.validation?.missing_components?.map((c, i) => ({
+    id: i, severity: design.validation.severities?.critical ? 'error' : 'warning',
+    title: 'Missing Component', description: `Missing ${c}. ${design.validation?.recommendations?.[i] || ''}`
+  })) || VALIDATION_DATA.issues;
+  
+  const valSuggs = design.validation?.recommendations?.map((r, i) => ({
+    id: i, title: 'AI Recommendation', description: r, impact: 'High'
+  })) || VALIDATION_DATA.suggestions;
+  
+  const costEstimation = design.cost?.total_monthly_usd_estimate || 0;
+  const costItemized = design.cost?.itemized || [];
 
   return (
     <div className="ip-panel">
@@ -109,7 +120,7 @@ export default function InsightsPanel({ design }) {
           accent="var(--red)"
           defaultOpen={true}
         >
-          {VALIDATION_DATA.issues.map(issue => (
+          {valIssues.map(issue => (
             <div key={issue.id} className={`ip-issue-card ${issue.severity}`}>
               <div className="ip-issue-top">
                  <span className="ip-issue-icon">{issue.severity === 'error' ? '🔴' : '🟡'}</span>
@@ -120,38 +131,34 @@ export default function InsightsPanel({ design }) {
           ))}
         </CollapsibleSection>
 
-        {/* ── Optimizations ── */}
+        {/* ── AI Cost Estimate ── */}
         <CollapsibleSection
-          title="Optimization Tips"
-          icon={<TrendingUp size={11} />}
+          title={`Cost Estimate (Monthly)`}
+          icon={<Zap size={11} />}
           accent="var(--green)"
-          defaultOpen={false}
+          defaultOpen={true}
         >
-          {VALIDATION_DATA.optimizations.map(opt => (
-            <div key={opt.id} className="ip-issue-card optimization">
-              <div className="ip-issue-title">⚡ {opt.title}</div>
-              <p className="ip-issue-desc">{opt.description}</p>
-              <div className="ip-issue-meta">
-                <span className="ip-tag">{opt.category}</span>
-              </div>
-            </div>
-          ))}
+          <div className="ip-issue-card">
+            <div className="ip-issue-title" style={{color:'var(--accent-bright)'}}>💰 Total: ${costEstimation}/month</div>
+            {costItemized.map((c, idx) => (
+              <p key={idx} className="ip-issue-desc">
+                {c.name} ({c.type}): ${c.monthly_cost}
+              </p>
+            ))}
+          </div>
         </CollapsibleSection>
 
-        {/* ── Suggestions ── */}
+        {/* ── Optimizations & Suggestions ── */}
         <CollapsibleSection
-          title="Suggestions"
+          title="AI Recommendations"
           icon={<Lightbulb size={11} />}
           accent="var(--blue)"
           defaultOpen={false}
         >
-          {VALIDATION_DATA.suggestions.map(s => (
+          {valSuggs.map(s => (
             <div key={s.id} className="ip-issue-card suggestion">
               <div className="ip-issue-title">💡 {s.title}</div>
               <p className="ip-issue-desc">{s.description}</p>
-              <div className="ip-issue-meta">
-                <span className="ip-tag">Impact: {s.impact}</span>
-              </div>
             </div>
           ))}
         </CollapsibleSection>
