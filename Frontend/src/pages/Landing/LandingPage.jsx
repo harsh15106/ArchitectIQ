@@ -70,12 +70,19 @@ export default function LandingPage() {
 
       {/* ── Minimal Premium Navbar (Centered Brand) ── */}
       <nav className={`landing-nav ${scrolled ? 'nav-scrolled' : ''}`}>
-        <div className="nav-left"></div>
+        <div className="nav-left">
+           {/* Hamburger for mobile landing navigation if needed, or just spacers */}
+           <div className="mobile-only">
+             {/* We can add a simple menu if needed later */}
+           </div>
+        </div>
         
         <div className="nav-center">
-          <span className="nav-brand-centered" onClick={() => navigate('/')}>
+          <button className="nav-brand-centered" onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}>
             ARCHITECTIQ
-          </span>
+          </button>
         </div>
 
         <div className="nav-right">

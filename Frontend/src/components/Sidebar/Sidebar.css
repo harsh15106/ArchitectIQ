@@ -1,190 +1,271 @@
-/* ── Elite Vertical Sidebar (Black & Gold) ────────────────── */
-.sidebar-wrapper {
-  width: 280px;
-  height: 100%;
+/* ── Modern Collapsible Sidebar ────────────────── */
+.sidebar {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--surface);
-  border-right: 1px solid var(--border);
+  padding: 12px 8px;
+  background: linear-gradient(180deg, #0B0B0B, #050505);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  position: sticky;
+  top: 0;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+  z-index: 1000;
   flex-shrink: 0;
-  position: relative;
-  z-index: 10;
-  transition: all 0.25s ease;
 }
 
-/* ── Heading ── */
-.sidebar-header {
-  height: 64px;
-  padding: 0 var(--space-6);
+/* ── Width States ── */
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar.expanded {
+  width: 240px;
+}
+
+/* ── Menu Layout ── */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* ── Smooth Text Hiding (IMPORTANT) ── */
+.sidebar-text {
+  transition: opacity 0.25s ease, width 0.25s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  opacity: 1;
+  width: auto;
+}
+
+.sidebar.collapsed .sidebar-text {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+/* ── Sidebar Items (Modern Premium) ── */
+.sidebar-item {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: #9CA3AF;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar.collapsed .sidebar-item {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar-item:hover {
+  background: rgba(212, 175, 55, 0.08);
+  color: #D4AF37;
+}
+
+.sidebar-item.active {
+  background: rgba(212, 175, 55, 0.12);
+  color: #D4AF37;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+/* ── Centered Icon Design (22px) ── */
+.sidebar-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Brand Header ── */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px;
+  min-height: 48px;
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
 }
 
 .sidebar-logo {
-  flex-shrink: 0;
   width: 32px;
   height: 32px;
+  border-radius: 8px;
+  background: #D4AF37;
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface);
-  border: 1px solid var(--accent); /* Elegant gold outline */
-  border-radius: 8px;
-  color: var(--accent);
+  flex-shrink: 0;
 }
 
 .sidebar-brand-title {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.015em;
-  text-transform: uppercase;
+  color: #E5E7EB;
 }
 
-/* ── Navigation ── */
-.sidebar-nav-container {
-  padding: var(--space-6) var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3); /* Consistent 12px gap */
-}
-
-.sidebar-nav-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: 12px var(--space-4);
-  border-radius: 10px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.sidebar-nav-item:hover {
-  background-color: var(--accent-soft);
-  color: var(--text-primary);
-}
-
-.sidebar-nav-item.active {
-  background: var(--accent-soft);
-  color: var(--accent);
-  box-shadow: 0 0 10px var(--accent-glow);
-}
-
-/* ── New Session Button (Luxury Outline Only) ── */
-.sidebar-new-btn {
-  margin: var(--space-4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: 14px;
-  background-color: transparent;
-  color: var(--accent);
+.sidebar-brand-subtitle {
+  font-size: 0.65rem;
   font-weight: 700;
-  font-size: 0.875rem;
-  border: 1px solid var(--accent);
-  border-radius: 10px;
-  transition: all 0.25s;
+  text-transform: uppercase;
+  color: #555;
+  letter-spacing: 0.05em;
 }
 
-.sidebar-new-btn:hover {
-  background-color: var(--accent-soft);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 15px var(--accent-glow);
+/* ── Tooltips (Collapsed ONLY) ── */
+.sidebar.collapsed .sidebar-item:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 80px;
+  background: #111;
+  color: #D4AF37;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  z-index: 2000;
+  animation: tooltipFade 0.2s ease;
 }
 
-/* ── Section (Recent History) ── */
-.sidebar-section {
-  padding: var(--space-6) var(--space-4);
+@keyframes tooltipFade {
+  from { opacity: 0; transform: translateX(-5px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Sections & History ── */
+.sidebar-section-wrap {
+  margin-top: 32px;
+  padding: 0 14px;
+}
+
+.sidebar.collapsed .sidebar-section-wrap {
+  display: none;
 }
 
 .sidebar-section-label {
   font-size: 0.65rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   font-weight: 800;
-  margin-bottom: var(--space-4);
-  padding-left: var(--space-2);
-}
-
-.sidebar-recent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  color: #444;
+  text-transform: uppercase;
+  margin-bottom: 12px;
 }
 
 .sidebar-recent-card {
-  width: 100%;
-  padding: 12px var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 8px;
+  margin-bottom: 6px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .sidebar-recent-card:hover {
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .recent-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  color: #9CA3AF;
 }
 
-.recent-meta {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-
-/* ── Footer / User Avatar ── */
+/* ── User Footer ── */
 .sidebar-footer {
   margin-top: auto;
-  padding: var(--space-4);
-  border-top: 1px solid var(--border);
+  padding: 12px 6px;
 }
 
 .sidebar-user-wrap {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 10px;
   border-radius: 10px;
-  transition: background-color 0.2s;
+  background: rgba(255, 255, 255, 0.02);
+  position: relative;
 }
 
-.sidebar-user-wrap:hover {
-  background-color: var(--accent-soft);
+.sidebar.collapsed .sidebar-user-wrap {
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-user-wrap:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 80px;
+  background: #111;
+  color: #D4AF37;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .sidebar-user-avatar {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  border: 1px solid var(--accent);
+  width: 32px;
+  height: 32px;
+  background: #222;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
-  align-items: center; justify-content: center;
-  color: var(--accent);
+  align-items: center;
+  justify-content: center;
   font-weight: 800;
+  color: #888;
 }
 
 .sidebar-user-name {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #E5E7EB;
 }
 
 .sidebar-user-plan {
-  font-size: 0.65rem;
-  color: var(--accent);
+  font-size: 0.6rem;
   font-weight: 800;
-  text-transform: uppercase;
+  color: #D4AF37;
+}
+
+/* ── Mobile Layout Fix ────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 240px !important;
+    transition: transform 0.35s ease;
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+
+  /* Text should stay visible on mobile drawer */
+  .sidebar.collapsed .sidebar-text {
+    opacity: 1;
+    width: auto;
+  }
 }

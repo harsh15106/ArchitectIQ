@@ -1,90 +1,84 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Plus, History, Bookmark, Settings, 
-  ChevronRight, Brain, User, Zap
+  Brain, Zap
 } from 'lucide-react';
 import { MOCK_HISTORY } from '../../data/mockData';
 import './Sidebar.css';
 
-export default function Sidebar({ activeNav, onNewSession, sessionTitle }) {
+export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
 
   const navItems = [
+    { icon: Zap, label: 'Workspace', path: '/app' },
     { icon: History, label: 'History', path: '/history' },
     { icon: Bookmark, label: 'Saved Designs', path: '/saved' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
-  const recentHistory = MOCK_HISTORY.slice(0, 4);
+  const recentHistory = MOCK_HISTORY.slice(0, 3);
 
   return (
-    <aside className="sidebar-wrapper">
-      {/* ── Brand Header ── */}
+    <aside className={`sidebar ${isOpen ? 'expanded' : 'collapsed'}`}>
+      {/* ── Header ── */}
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <Brain size={18} strokeWidth={2.5} />
+          <Brain size={20} strokeWidth={2.5} />
         </div>
-        <div className="sidebar-brand-group">
+        <div className="sidebar-text sidebar-brand-group">
           <h1 className="sidebar-brand-title">ArchitectIQ</h1>
           <p className="sidebar-brand-subtitle">AI Assistant</p>
         </div>
       </div>
 
-      {/* ── New Session Button ── */}
-      <motion.button
-        whileHover={{ scale: 1.01, translateY: -1 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => navigate('/app')}
-        className="sidebar-new-btn"
-      >
-        <Plus size={16} strokeWidth={3} />
-        <span>New Architect Session</span>
-      </motion.button>
+      {/* ── New Session ── */}
+      <div className="sidebar-menu">
+        <button
+          onClick={() => { navigate('/app'); onClose(); }}
+          className="sidebar-item sidebar-new-btn"
+          data-label="New Session"
+        >
+          <Plus size={20} className="sidebar-icon" strokeWidth={3} />
+          <span className="sidebar-text">New Session</span>
+        </button>
 
-      {/* ── Primary Navigation ── */}
-      <nav className="sidebar-nav-container">
+        {/* ── primary Nav ── */}
         {navItems.map((item) => (
           <button
             key={item.label}
-            onClick={() => navigate(item.path)}
-            className={`sidebar-nav-item ${activeNav === item.path ? 'active' : ''}`}
+            onClick={() => { navigate(item.path); onClose(); }}
+            className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}
+            data-label={item.label}
           >
-            <item.icon size={18} strokeWidth={2.25} />
-            <span>{item.label}</span>
+            <item.icon size={20} className="sidebar-icon" strokeWidth={2.25} />
+            <span className="sidebar-text">{item.label}</span>
           </button>
         ))}
-      </nav>
+      </div>
 
-      {/* ── Recent History List ── */}
-      <div className="sidebar-section">
-        <h3 className="sidebar-section-label">Most Recent</h3>
+      {/* ── History (Only visible when expanded) ── */}
+      <div className="sidebar-section-wrap">
+        <div className="sidebar-text sidebar-section-label">Most Recent</div>
         <div className="sidebar-recent-list">
           {recentHistory.map((item) => (
-            <motion.div
+            <div
               key={item.id}
-              whileHover={{ x: 4 }}
               className="sidebar-recent-card"
-              onClick={() => navigate('/history')}
+              onClick={() => { navigate('/history'); onClose(); }}
             >
-              <span className="recent-title">{item.title}</span>
-              <div className="recent-meta">
-                <span>{item.timestamp}</span>
-                <span>{item.complexity}</span>
-              </div>
-            </motion.div>
+              <span className="sidebar-text recent-title">{item.title}</span>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* ── User & Status Section ── */}
+      {/* ── User ── */}
       <footer className="sidebar-footer">
-        <div className="sidebar-user-wrap">
-          <div className="sidebar-user-avatar">
-             <span>U</span>
-          </div>
-          <div className="sidebar-user-info">
+        <div className="sidebar-user-wrap" data-label="Professional User">
+          <div className="sidebar-user-avatar">U</div>
+          <div className="sidebar-text sidebar-user-info">
              <p className="sidebar-user-name">Professional User</p>
              <p className="sidebar-user-plan">PRO PLAN</p>
           </div>

@@ -2,13 +2,31 @@
 .dc-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow-y: auto;
   background-color: var(--bg);
 }
 
-.dc-wrapper::-webkit-scrollbar { width: 4px; }
-.dc-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+/* ── Tech Stack Chips ── */
+.dc-tech-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dc-tech-chip {
+  padding: 6px 12px;
+  background-color: #161616;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: #D4AF37;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.dc-tech-chip:hover {
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+}
 
 /* ── Heading ── */
 .dc-header {
@@ -130,17 +148,115 @@
   border-radius: 4px;
 }
 
-/* ── Diagram area (Minimal Black) ── */
+/* ── Diagram area (Premium Gold Edition) ── */
 .dc-diagram-wrap {
-  padding: var(--space-6);
-  background-color: #050505;
+  padding: 16px;
+  background-color: #050508;
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: auto;
+  border-radius: 20px;
+  overflow: hidden; /* Handled by JS Pan/Zoom */
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 350px;
+  min-height: 700px; /* Dominant & Immersive */
+  position: relative;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.dc-diagram-wrap:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.05);
+}
+
+/* ── High-Fidelity Node Interactions ── */
+.mermaid svg g.node rect,
+.mermaid svg g.node circle,
+.mermaid svg g.node polygon {
+  transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1) !important;
+  stroke-width: 1.5px !important;
+}
+
+.mermaid svg g.node.highlight-node rect,
+.mermaid svg g.node.highlight-node circle,
+.mermaid svg g.node.highlight-node polygon {
+  stroke-width: 2.5px !important;
+  stroke: var(--accent) !important;
+  filter: drop-shadow(0 0 5px var(--accent-glow));
+}
+
+.mermaid svg g.node:hover {
+  transform: scale(1.05);
+  transform-origin: center;
+}
+
+.mermaid svg g.node:hover rect,
+.mermaid svg g.node:hover circle,
+.mermaid svg g.node:hover polygon {
+  stroke: var(--accent) !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 12px var(--accent-glow));
+  cursor: pointer;
+}
+
+/* ── Pulsing Connection Lines ── */
+.mermaid svg .edgePath path {
+  stroke-width: 2px !important;
+  stroke-dasharray: 10, 5;
+  animation: edgePulse 10s linear infinite;
+}
+
+@keyframes edgePulse {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes nodeGlow {
+  0% { filter: drop-shadow(0 0 5px var(--accent-glow)); }
+  50% { filter: drop-shadow(0 0 15px var(--accent-glow)); }
+  100% { filter: drop-shadow(0 0 5px var(--accent-glow)); }
+}
+
+/* ── Node Edit Popup (Simulated) ── */
+.dc-edit-popup {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1a1a1a;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 20px;
+  z-index: 100;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px var(--accent-glow);
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dc-edit-title {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.dc-edit-input {
+  background: #111111;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  outline: none;
+}
+
+.dc-edit-input:focus { border-color: var(--accent); }
+
+.dc-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 /* ── Pros/Cons ── */

@@ -62,19 +62,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children, accent 
 }
 
 export default function InsightsPanel({ design }) {
-  if (!design) {
-    return (
-      <div className="ip-panel">
-        <div className="ip-header">
-          <span className="ip-title"><Activity size={13} /> Insights</span>
-        </div>
-        <div className="ip-empty">
-          <div className="ip-empty-icon"><BarChart2 size={18} style={{ color: 'var(--text-muted)' }} /></div>
-          <p className="ip-empty-text">Generate architectures to see<br />validation, scores, and AI critique.</p>
-        </div>
-      </div>
-    );
-  }
+  if (!design) return null; // Let the toggle handle empty states
 
   const scores = design.scores;
 
@@ -89,19 +77,19 @@ export default function InsightsPanel({ design }) {
 
         {/* ── System Scores ── */}
         <CollapsibleSection title="System Scores" icon={<BarChart2 size={11} />} defaultOpen={true}>
-          <div className="ip-score-row">
+          <div className="ip-score-container">
             {SCORE_KEYS.map(({ key, label }) => {
               const val = scores[key];
               const color = scoreColor(val);
               return (
-                <div key={key} className="ip-score-item">
-                  <div className="ip-score-label-row">
+                <div key={key} className="ip-score-metric">
+                  <div className="ip-score-header">
                     <span className="ip-score-label">{label}</span>
-                    <span className="ip-score-value" style={{ color }}>{val}%</span>
+                    <span className="ip-score-percent" style={{ color }}>{val}%</span>
                   </div>
-                  <div className="ip-score-bar-bg">
+                  <div className="ip-score-track">
                     <motion.div
-                      className="ip-score-bar-fill"
+                      className="ip-score-fill"
                       initial={{ width: 0 }}
                       animate={{ width: `${val}%` }}
                       transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
@@ -123,14 +111,11 @@ export default function InsightsPanel({ design }) {
         >
           {VALIDATION_DATA.issues.map(issue => (
             <div key={issue.id} className={`ip-issue-card ${issue.severity}`}>
-              <div className="ip-issue-title">
-                {issue.severity === 'error' ? '🔴' : '🟡'} {issue.title}
+              <div className="ip-issue-top">
+                 <span className="ip-issue-icon">{issue.severity === 'error' ? '🔴' : '🟡'}</span>
+                 <span className="ip-issue-title">{issue.title}</span>
               </div>
               <p className="ip-issue-desc">{issue.description}</p>
-              <div className="ip-issue-meta">
-                <span className="ip-tag">{issue.component}</span>
-                <span className="ip-tag">{issue.severity.toUpperCase()}</span>
-              </div>
             </div>
           ))}
         </CollapsibleSection>
@@ -171,11 +156,10 @@ export default function InsightsPanel({ design }) {
           ))}
         </CollapsibleSection>
 
-        {/* ── AI Critique ── */}
         <CollapsibleSection
           title="AI Critique"
           icon={<Brain size={11} />}
-          accent="var(--accent-bright)"
+          accent="#D4AF37"
           defaultOpen={true}
         >
           <div className="ip-critique-box">

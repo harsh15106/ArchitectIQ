@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Layers } from 'lucide-react';
+import { Layers, Menu, X, LogOut } from 'lucide-react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import './MainLayout.css';
 
@@ -11,41 +12,52 @@ const PAGE_TITLES = {
 };
 
 export default function MainLayout() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'Workspace';
 
   return (
-    <div className="main-layout">
-      {/* ── Background Decals for layout ── */}
-      <div className="layout-orb layout-orb-1" />
-      <div className="layout-orb layout-orb-2" />
+    <div className="app-container">
+      {/* ── Global Navbar (Always Top-Level) ── */}
+      <nav className="navbar">
+        <div className="navbar-left">
+          <button 
+            className="hamburger-btn" 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
 
-      <div className="layout-container">
-        <Sidebar
-          activeNav={location.pathname}
-          onNewSession={() => navigate('/app')}
-          sessionTitle={pageTitle}
+        <div className="navbar-center" onClick={() => navigate('/')}>
+          <span className="brand-text">ARCHITECTIQ</span>
+        </div>
+
+        <div className="navbar-right">
+          <button className="navbar-logout-btn" onClick={() => navigate('/')}>
+            <LogOut size={16} />
+            <span>Logout</span>
+          </button>
+          <div id="topbar-actions" />
+        </div>
+      </nav>
+
+      <div className="main-layout">
+        {/* ── Sidebar Global Overlay (Mobile Only Focus) ── */}
+        <div 
+          className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} 
+          onClick={() => setIsSidebarOpen(false)}
         />
 
-        <div className="main-content-col">
-          {/* Top navigation */}
-          <header className="main-topbar">
-            <div className="topbar-title-wrap">
-              <div className="topbar-icon-wrap">
-                <Layers size={14} />
-              </div>
-              <span className="topbar-title">
-                {pageTitle}
-              </span>
-            </div>
-            <div id="topbar-actions" />
-          </header>
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
 
-          <main className="main-outlet-wrapper">
-            <Outlet />
-          </main>
-        </div>
+        <main className="main-content">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

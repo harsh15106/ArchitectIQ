@@ -1,9 +1,9 @@
-/* ── High-End Workspace (Black & Gold) ────────────────── */
 .workspace-root {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  height: calc(100vh - 64px); /* Subtract topbar */
+  width: 100%;
+  overflow: hidden;
   background-color: var(--bg);
 }
 
@@ -125,22 +125,139 @@
   color: var(--accent);
 }
 
+/* ── Clarification Progress ── */
+.ws-progress-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ws-progress-indicator span {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.ws-progress-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.ws-progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s ease;
+}
+
+.ws-progress-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  transform: scale(1.2);
+}
+
+.ws-skip-btn {
+  margin-top: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+}
+
+.ws-skip-btn:hover {
+  color: var(--accent);
+}
+
 /* ── Elite Content Viewport ── */
 .ws-content-area {
   flex: 1;
   display: flex;
-  min-height: 0;
+  height: 100%;
   position: relative;
   background-color: var(--bg);
+  transition: padding-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .ws-design-area {
   flex: 1;
-  padding: var(--space-8); 
+  padding: 40px; 
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   align-items: center; 
+  min-width: 0;
+}
+
+/* ── Insights Drawer Wrap ── */
+.ws-insights-drawer-wrap {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  z-index: 100;
+  background-color: #111111;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Resizer Handle ── */
+.ws-resizer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 101;
+  transition: all 0.2s ease;
+}
+
+.ws-resizer:hover, .ws-resizer.active {
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  width: 6px;
+  left: -1px;
+}
+
+/* ── Panel Toggle Button (Floating) ── */
+.ws-panel-toggle-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #161616;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001; /* Above almost everything */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.ws-panel-toggle-btn:hover {
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.ws-panel-toggle-btn.collapsed {
+  background-color: var(--accent);
+  color: #000;
+  border-color: transparent;
 }
 
 /* ── Centered Content Card Container ── */

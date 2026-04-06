@@ -1,0 +1,151 @@
+/* ── History Card: Futuristic Premium Layer ────────────────── */
+.card-wrapper {
+  background: linear-gradient(145deg, #0F0F0F, #050505);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 20px;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.card-wrapper:hover {
+  transform: translateY(-5px);
+  border-color: rgba(212, 175, 55, 0.3);
+  box-shadow: 0 12px 40px rgba(212, 175, 55, 0.08);
+}
+
+/* ── Top Section ── */
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.card-title-main {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #E5E7EB;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  flex: 1;
+  padding-right: 12px;
+}
+
+.card-complexity-badge {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.08);
+  color: #D4AF37;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  white-space: nowrap;
+}
+
+/* ── Description ── */
+.card-preview-text {
+  font-size: 0.8125rem;
+  color: #9CA3AF;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Tech Stack Chips ── */
+.card-tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.card-tech-chip {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #D4AF37;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  transition: all 0.2s;
+}
+
+.card-wrapper:hover .card-tech-chip {
+  background: rgba(212, 175, 55, 0.05);
+  border-color: rgba(212, 175, 55, 0.1);
+}
+
+/* ── Footer ── */
+.card-bottom-row {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-time-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B7280;
+}
+
+.card-status-label {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: rgba(34, 197, 94, 0.08);
+  color: #22C55E;
+}
+
+/* ── Hover Actions Overlay ── */
+.card-quick-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-wrapper:hover .card-quick-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-action-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #111;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+}
+
+.card-action-circle:hover {
+  background: #D4AF37;
+  color: #000;
+  border-color: #D4AF37;
+}
