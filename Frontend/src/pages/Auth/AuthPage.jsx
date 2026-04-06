@@ -5,10 +5,12 @@ import {
   LogIn, UserPlus, Mail, Lock, User, 
   Briefcase, ArrowRight, Sparkles, Eye, EyeOff 
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './AuthPage.css';
 
 export default function AuthPage({ initialMode = 'login' }) {
   const navigate = useNavigate();
+  const { login, register } = useAuth();
   const [mode, setMode] = useState(initialMode); // 'login' | 'signup'
   const [formData, setFormData] = useState({
     name: '',
@@ -32,31 +34,24 @@ export default function AuthPage({ initialMode = 'login' }) {
     e.preventDefault();
     setIsLoading(true);
     
-    // Logic: Signup Check
     if (mode === 'signup' && formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
       return;
     }
 
-    // Simulate API delay
-    await new Promise(r => setTimeout(r, 1500));
-    
-    // Save to Mock user store
-    const userData = {
-      name: formData.name || 'Demo User',
-      email: formData.email,
-      role: formData.role,
-      id: `USER-${Math.floor(Math.random() * 90000) + 10000}`
-    };
-    
-    localStorage.setItem('currentUser', JSON.stringify(userData));
-    localStorage.setItem('isAuthenticated', 'true');
-    
-    setIsLoading(false);
-    // TRAP NAVIGATION: use replace: true so browser back button doesn't go to login
-    navigate('/app', { replace: true });
-    window.location.reload(); // Ensure App status updates
+    try {
+      if (mode === 'login') {
+        await login(formData.email, formData.password);
+      } else {
+        await register(formData.name || 'AI Architect', formData.email, formData.password, formData.role);
+      }
+      
+      navigate('/app', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Authentication failed');
+      setIsLoading(false);
+    }
   };
 
   return (

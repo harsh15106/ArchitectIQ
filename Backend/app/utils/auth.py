@@ -38,11 +38,20 @@ def decode_token(token: str):
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if not credentials:
-        # DEVELOPER MODE BYPASS: If no token provided, return a mock user so frontend testing works flawlessly
-        return {"id": "dev-local-bypass-user", "email": "dev@architectiq.local"}
+        raise HTTPException(status_code=401, detail="Not authenticated")
         
     payload = decode_token(credentials.credentials)
     user_id = payload.get("sub")
     if user_id is None:
         raise HTTPException(status_code=401, detail="Invalid token")
-    return {"id": user_id, "email": payload.get("email")}
+    return {
+        "id": user_id, 
+        "name": payload.get("name", "Unknown"), 
+        "email": payload.get("email"), 
+        "role": payload.get("role", "user")
+    }
+
+def get_admin_user(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Not enough privileges")
+    return current_user

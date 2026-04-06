@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Layers, Menu, X, LogOut } from 'lucide-react';
 import Sidebar from '../components/Sidebar/Sidebar';
+import { useAuth } from '../context/AuthContext';
 import './MainLayout.css';
 
 const PAGE_TITLES = {
@@ -15,7 +16,13 @@ export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'Workspace';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <div 
@@ -42,7 +49,7 @@ export default function MainLayout() {
         </div>
 
         <div className="navbar-right">
-          <button className="navbar-logout-btn" onClick={() => navigate('/')}>
+          <button className="navbar-logout-btn" onClick={handleLogout}>
             <LogOut size={16} />
             <span>Logout</span>
           </button>

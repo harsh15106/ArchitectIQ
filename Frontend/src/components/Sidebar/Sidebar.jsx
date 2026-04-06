@@ -5,6 +5,7 @@ import {
   Brain, Zap, Menu, X, LogOut
 } from 'lucide-react';
 import { MOCK_HISTORY } from '../../data/mockData';
+import { useAuth } from '../../context/AuthContext';
 import './Sidebar.css';
 
 export default function Sidebar({ isOpen, onClose, onToggle }) {
@@ -20,14 +21,12 @@ export default function Sidebar({ isOpen, onClose, onToggle }) {
 
   const recentHistory = MOCK_HISTORY.slice(0, 3);
   
-  // Dynamic user data from localStorage
-  const userData = JSON.parse(localStorage.getItem('currentUser') || '{"name": "Professional User", "role": "Pro Plan"}');
+  const { user, logout } = useAuth();
+  const userData = user || { name: 'Demo User', role: 'user' };
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('currentUser');
+    logout();
     navigate('/login', { replace: true });
-    window.location.reload();
   };
 
   return (
