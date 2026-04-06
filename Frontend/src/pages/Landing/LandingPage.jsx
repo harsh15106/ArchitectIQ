@@ -86,10 +86,10 @@ export default function LandingPage() {
         </div>
 
         <div className="nav-right">
-          <button className="nav-btn-login" onClick={() => navigate('/app')}>
+          <button className="nav-btn-login" onClick={() => navigate('/login')}>
             Login
           </button>
-          <button className="nav-btn-signup" onClick={() => navigate('/app')}>
+          <button className="nav-btn-signup" onClick={() => navigate('/signup')}>
             Sign Up
           </button>
         </div>
@@ -132,10 +132,10 @@ export default function LandingPage() {
             transition={{ delay: 0.3 }}
             className="hero-cta-centered"
           >
-            <button className="btn-primary-outline" onClick={() => navigate('/app')}>
+            <button className="btn-primary-outline" onClick={() => navigate('/signup')}>
               Start Designing
             </button>
-            <button className="btn-secondary-link" onClick={() => navigate('/app')}>
+            <button className="btn-secondary-link" onClick={() => navigate('/login')}>
               View Demo
             </button>
           </motion.div>

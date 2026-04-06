@@ -75,23 +75,24 @@
   width: 100%;
   min-height: 0;
   position: relative;
+  /* Add dynamic padding logic for fixed sidebar */
+  padding-left: var(--sidebar-width, 240px);
+  transition: padding-left 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .main-content {
   flex: 1;
   height: auto;
-  overflow-y: auto;
   padding: 24px;
-  padding-bottom: 40px;
+  padding-bottom: 80px; /* Enhanced bottom spacing */
   position: relative;
   background-color: var(--bg);
-  scroll-behavior: smooth;
 }
 
 .main-content::after {
   content: "";
   display: block;
-  height: 60px;
+  height: 100px; /* Dominant spacer for ultimate bottom-reach */
 }
 
 /* ── Hamburger / Interactions ────────────────── */

@@ -1,9 +1,7 @@
 .workspace-root {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px); /* Subtract topbar */
   width: 100%;
-  overflow: hidden;
   background-color: var(--bg);
 }
 
@@ -180,84 +178,78 @@
 .ws-content-area {
   flex: 1;
   display: flex;
-  height: 100%;
   position: relative;
   background-color: var(--bg);
   transition: padding-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
 }
 
 .ws-design-area {
   flex: 1;
-  padding: 40px; 
+  padding: 40px 20px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
   align-items: center; 
   min-width: 0;
 }
 
-/* ── Insights Drawer Wrap ── */
-.ws-insights-drawer-wrap {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
+/* ── Insights Drawer (Right Panel) ── */
+.right-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 320px;
+  flex-shrink: 0;
   z-index: 100;
   background-color: #111111;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: visible !important; /* CRITICAL: Show the toggle button */
+  transition: transform 0.35s ease;
+}
+
+.right-panel-body {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
-/* ── Resizer Handle ── */
-.ws-resizer {
+@media (max-width: 1024px) {
+  .right-panel,
+  .insight-toggle {
+    display: none !important;
+  }
+}
+
+.insight-toggle {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  cursor: col-resize;
-  background: transparent;
-  z-index: 101;
-  transition: all 0.2s ease;
-}
-
-.ws-resizer:hover, .ws-resizer.active {
-  background: var(--accent);
-  box-shadow: 0 0 12px var(--accent-glow);
-  width: 6px;
-  left: -1px;
-}
-
-/* ── Panel Toggle Button (Floating) ── */
-.ws-panel-toggle-btn {
-  position: fixed;
+  left: -28px; 
   top: 50%;
   transform: translateY(-50%);
+  z-index: 101; /* Higher than panel */
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background-color: #161616;
-  border: 1px solid var(--border);
-  color: var(--accent);
+  background: #111111;
+  border: 1px solid var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--accent);
   cursor: pointer;
-  z-index: 1001; /* Above almost everything */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 8px rgba(212, 175, 55, 0.2);
 }
 
-.ws-panel-toggle-btn:hover {
-  background-color: var(--accent-soft);
-  border-color: var(--accent);
-  box-shadow: 0 0 10px var(--accent-glow);
-}
-
-.ws-panel-toggle-btn.collapsed {
-  background-color: var(--accent);
+.insight-toggle:hover {
+  background: var(--accent);
   color: #000;
-  border-color: transparent;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 15px var(--accent-glow);
 }
 
 /* ── Centered Content Card Container ── */
@@ -274,12 +266,13 @@
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-4);
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
 }
 
 .ws-comparison-col {
   background-color: var(--bg);
-  height: 100%;
+  height: auto;
 }
 
 /* ── Elite Empty / Static States ── */

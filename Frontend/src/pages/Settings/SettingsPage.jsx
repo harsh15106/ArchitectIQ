@@ -1,197 +1,143 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Settings as SettingsIcon, User, Monitor, Brain, 
-  Bell, Database, ShieldAlert, Sparkles, Save, 
-  Trash2, Download, LogOut 
-} from 'lucide-react';
-import { SettingsSection, ToggleSwitch, InputField, DropdownSelect } from './SettingsUI';
+import { LogOut, Edit2, X, Save, User, Mail, Briefcase } from 'lucide-react';
 import './SettingsPage.css';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('Account');
-  const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
+  const [user, setUser] = useState({
+    name: 'Professional User',
+    email: 'user@architect-iq.com',
+    id: 'USER-82910',
+    role: 'AI Architect'
+  });
 
-  // --- Settings State (Mock) ---
-  const [account, setAccount] = useState({ name: 'User', email: 'user@example.com' });
-  const [appearance, setAppearance] = useState({ theme: 'Dark', animations: true, compact: false, highContrast: false });
-  const [aiPrefs, setAiPrefs] = useState({ style: 'Scalable', output: 'Single Design', depth: 'Intermediate' });
-  const [notifications, setNotifications] = useState({ email: true, alerts: true, updates: false });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ ...user });
 
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => setIsSaving(false), 2000); // Simulate API call
+  useEffect(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      setEditForm(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('currentUser');
+    navigate('/login');
+    window.location.reload(); // Force app re-check
   };
 
-  const navItems = [
-    { icon: User, label: 'Account' },
-    { icon: Monitor, label: 'Appearance' },
-    { icon: Brain, label: 'AI Preferences' },
-    { icon: Bell, label: 'Notifications' },
-    { icon: Database, label: 'Data & Privacy' },
-  ];
+  const handleSave = () => {
+    localStorage.setItem('currentUser', JSON.stringify(editForm));
+    setUser(editForm);
+    setIsEditing(false);
+  };
 
   return (
-    <div className="settings-page-wrapper">
-      <header className="settings-header">
-        <div className="settings-title-wrap">
-           <div className="settings-icon-wrap">
-              <SettingsIcon size={22} />
-           </div>
-           <div>
-             <h1 className="settings-title">Settings</h1>
-             <p className="settings-subtitle">Manage your personal and system configurations</p>
-           </div>
+    <div className="profile-page">
+      <motion.div 
+        className="profile-card"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="profile-header">PROFILE</div>
+
+        <div className="avatar">
+          {user.name.charAt(0)}
         </div>
 
-        <motion.button 
-          onClick={handleSave}
-          disabled={isSaving}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={`settings-save-btn ${isSaving ? 'saving' : 'normal'}`}
-        >
-           {isSaving ? <Sparkles size={16} className="animate-spin" /> : <Save size={16} />}
-           <span>{isSaving ? 'Saving Changes...' : 'Save Changes'}</span>
-        </motion.button>
-      </header>
+        <div className="profile-details">
+          <div className="profile-name">{user.name}</div>
+          <div className="profile-email">{user.email}</div>
+          <div className="profile-role-badge">{user.role}</div>
+        </div>
 
-      <div className="settings-main">
-         <aside className="settings-sidebar">
-            {navItems.map(item => (
-              <button 
-                key={item.label}
-                onClick={() => setActiveTab(item.label)}
-                className={`settings-nav-btn ${activeTab === item.label ? 'active' : 'inactive'}`}
-              >
-                <item.icon size={16} strokeWidth={2.5} />
-                {item.label}
-              </button>
-            ))}
+        <div className="divider" />
 
-            <div className="settings-logout-wrap">
-               <button className="settings-logout-btn">
-                  <LogOut size={16} strokeWidth={2.5} />
-                  Log Out
-               </button>
-            </div>
-         </aside>
+        <div className="profile-id-section">
+          <div className="profile-id">{user.id}</div>
+        </div>
 
-         <main className="settings-content-area custom-scrollbar">
-            <div className="settings-content-inner">
-               <AnimatePresence mode="wait">
-                  {activeTab === 'Account' && (
-                    <SettingsSection key="account" title="Account Settings" description="Your personal identification and profile information.">
-                       <div className="settings-avatar-row">
-                          <div className="settings-avatar-circle">
-                            U
-                          </div>
-                          <div className="settings-avatar-actions">
-                             <button className="settings-avatar-change-btn">
-                                Change Avatar
-                             </button>
-                             <button className="settings-avatar-remove-btn">
-                                Remove Picture
-                             </button>
-                          </div>
-                       </div>
-                       <InputField label="Display Name" value={account.name} onChange={v => setAccount({...account, name: v})} placeholder="Your full name" />
-                       <InputField label="Email Address" value={account.email} onChange={v => setAccount({...account, email: v})} placeholder="email@example.com" type="email" />
-                       <InputField label="Connected ID" value="USER-82910" readOnly={true} placeholder="" />
-                    </SettingsSection>
-                  )}
+        <div className="profile-actions">
+          <button className="btn-secondary" onClick={() => setIsEditing(true)}>
+            <Edit2 size={13} />
+            <span>Edit Profile</span>
+          </button>
+          <button className="btn-primary" onClick={handleLogout}>
+            <LogOut size={13} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </motion.div>
 
-                  {activeTab === 'Appearance' && (
-                    <SettingsSection key="appearance" title="Appearance Settings" description="Customize how the AI workspace looks and feels on your machine.">
-                       <DropdownSelect label="Theme Mode" options={['Dark', 'Light', 'System']} value={appearance.theme} onChange={v => setAppearance({...appearance, theme: v})} />
-                       <div className="settings-divider" />
-                       <ToggleSwitch label="Enable Animations" description="Smooth transitions and spring effects on interactions." enabled={appearance.animations} onChange={v => setAppearance({...appearance, animations: v})} />
-                       <ToggleSwitch label="Compact Layout" description="Reduce padding and text size for higher architecture density." enabled={appearance.compact} onChange={v => setAppearance({...appearance, compact: v})} />
-                       <ToggleSwitch label="High Contrast Mode" description="Stronger borders and sharper text for accessibility." enabled={appearance.highContrast} onChange={v => setAppearance({...appearance, highContrast: v})} />
-                    </SettingsSection>
-                  )}
+      {/* ── Edit Modal ── */}
+      <AnimatePresence>
+        {isEditing && (
+          <div className="modal-overlay">
+            <motion.div 
+              className="modal-content profile-edit-modal"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            >
+              <div className="modal-header">
+                <h2>Edit Profile</h2>
+                <button className="close-btn" onClick={() => setIsEditing(false)}>
+                  <X size={18} />
+                </button>
+              </div>
 
-                  {activeTab === 'AI Preferences' && (
-                    <SettingsSection key="ai" title="AI Preferences" description="Configure engine behavior for architecture generation.">
-                       <DropdownSelect label="Preferred Architecture style" options={['MVP', 'Scalable', 'Balanced', 'Serverless First']} value={aiPrefs.style} onChange={v => setAiPrefs({...aiPrefs, style: v})} />
-                       <DropdownSelect label="Output Generation Mode" options={['Single Design', 'Multi-design Comparison']} value={aiPrefs.output} onChange={v => setAiPrefs({...aiPrefs, output: v})} />
-                       <DropdownSelect label="Explanation Depth" options={['Basic', 'Intermediate', 'Advanced explanations']} value={aiPrefs.depth} onChange={v => setAiPrefs({...aiPrefs, depth: v})} />
-                       <div className="settings-note-box">
-                          <p className="settings-note-text">
-                            <strong>Note:</strong> Higher depth levels provide more detailed justification for component selection but may increase generation time.
-                          </p>
-                       </div>
-                    </SettingsSection>
-                  )}
+              <div className="edit-form">
+                <div className="edit-input-group">
+                  <label><User size={12} /> Name</label>
+                  <input 
+                    type="text" 
+                    value={editForm.name} 
+                    onChange={e => setEditForm({...editForm, name: e.target.value})}
+                  />
+                </div>
+                <div className="edit-input-group">
+                  <label><Mail size={12} /> Email</label>
+                  <input 
+                    type="email" 
+                    value={editForm.email} 
+                    onChange={e => setEditForm({...editForm, email: e.target.value})}
+                  />
+                </div>
+                <div className="edit-input-group">
+                  <label><Briefcase size={12} /> Role</label>
+                  <select 
+                    value={editForm.role} 
+                    onChange={e => setEditForm({...editForm, role: e.target.value})}
+                  >
+                    <option>AI Architect</option>
+                    <option>Senior Developer</option>
+                    <option>DevOps Lead</option>
+                    <option>CTO</option>
+                  </select>
+                </div>
+              </div>
 
-                  {activeTab === 'Notifications' && (
-                    <SettingsSection key="notifications" title="Notifications" description="Keep track of your projects and system design updates.">
-                       <ToggleSwitch label="Email Notifications" description="Weekly digest of your saved designs and updates." enabled={notifications.email} onChange={v => setNotifications({...notifications, email: v})} />
-                       <ToggleSwitch label="System Activity Alerts" description="Notify when a background architecture job completes." enabled={notifications.alerts} onChange={v => setNotifications({...notifications, alerts: v})} />
-                       <ToggleSwitch label="Platform Product Updates" description="Be first to know about new AI engine features." enabled={notifications.updates} onChange={v => setNotifications({...notifications, updates: v})} />
-                    </SettingsSection>
-                  )}
-
-                  {activeTab === 'Data & Privacy' && (
-                    <SettingsSection key="data" title="Data Management" description="Manage your sensitive history and storage.">
-                       <div className="flex flex-col gap-4">
-                          <button className="settings-export-btn">
-                             <div className="settings-export-left">
-                                <Download size={16} className="settings-export-icon" />
-                                <span className="settings-export-text">Export Portfolio Data</span>
-                             </div>
-                             <ArrowUpRight size={14} className="settings-export-arrow" />
-                          </button>
-                          
-                          <div className="settings-divider" />
-                          
-                          <div className="settings-danger-zone">
-                             <h4 className="settings-danger-title">
-                                <ShieldAlert size={12} />
-                                Danger Zone
-                             </h4>
-                             
-                             <button className="settings-danger-btn">
-                                <Trash2 size={16} className="settings-danger-btn-icon" />
-                                <span className="settings-danger-btn-text">Clear All History Sessions</span>
-                             </button>
-                             
-                             <button className="settings-danger-btn">
-                                <Trash2 size={16} className="settings-danger-btn-icon" />
-                                <span className="settings-danger-btn-text">Delete Account Forever</span>
-                             </button>
-                          </div>
-                       </div>
-                    </SettingsSection>
-                  )}
-               </AnimatePresence>
-            </div>
-         </main>
-      </div>
+              <div className="modal-footer">
+                <button className="btn-cancel" onClick={() => setIsEditing(false)}>Cancel</button>
+                <button className="btn-save" onClick={handleSave}>
+                  <Save size={14} />
+                  <span>Update Profile</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="settings-ambient-bg">
         <div className="orb settings-orb" />
       </div>
     </div>
-  );
-}
-
-function ArrowUpRight({ size, className }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2.5" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M7 7h10v10" />
-      <path d="M7 17 17 7" />
-    </svg>
   );
 }

@@ -1,36 +1,40 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Columns2, LayoutPanelLeft, Layers, Sparkles, Cpu, Search, Zap, CheckCircle2, ChevronRight, XCircle, ArrowRight, ArrowLeft } from 'lucide-react';
-import { MULTI_DESIGNS } from '../../data/mockData';
+import { 
+  Columns2, LayoutPanelLeft, Layers, Sparkles, Cpu, Search, Zap, 
+  CheckCircle2, ChevronRight, XCircle, ArrowRight, ArrowLeft 
+} from 'lucide-react';
+import { MULTI_DESIGNS, CLARIFICATION_QUESTIONS, EXAMPLE_PROMPTS } from '../../data/mockData';
 import { startDesignSession, answerDesignQuestions } from '../../lib/api';
 import WorkspaceInput from './WorkspaceInput';
 import DesignCard from './DesignCard';
 import InsightsPanel from './InsightsPanel';
 import './ChatApp.css';
 
-const EXAMPLE_PROMPTS = [
-  'Design a social media feed for 50M users',
-  'Build a ride-sharing backend with location tracking',
-  'Create a PCI-compliant payment gateway',
-  'Design a video streaming platform',
-];
-
 export default function ChatApp() {
-  const [activeTabId, setActiveTabId] = useState('scalable');
-  const [isComparison, setIsComparison] = useState(false);
-  const [step, setStep] = useState('IDLE'); // 'IDLE' | 'CLARIFY' | 'GENERATING' | 'RESULTS'
+  const navigate = useNavigate();
+  const [step, setStep] = useState('IDLE'); // IDLE | CLARIFY | GENERATING | RESULTS
   const [prompt, setPrompt] = useState('');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [panelWidth, setPanelWidth] = useState(340);
-  const [isResizing, setIsResizing] = useState(false);
-  const [isInsightsManualOpen, setIsInsightsManualOpen] = useState(true);
+  
+  // Auth & Session Logic (Backend Logic - Keeping Remote)
   const [sessionId, setSessionId] = useState(null);
   const [dynamicQuestions, setDynamicQuestions] = useState([]);
   const [dynamicDesign, setDynamicDesign] = useState(null);
+  const [answers, setAnswers] = useState({});
 
-  const startResizing = useCallback((e) => {
-    e.preventDefault();
+  // Luxury UI States (Priority: Mine)
+  const [activeTabId, setActiveTabId] = useState('scalable');
+  const [isComparison, setIsComparison] = useState(false);
+  const [isInsightsManualOpen, setIsInsightsManualOpen] = useState(true);
+  const [panelWidth, setPanelWidth] = useState(380);
+  const [isResizing, setIsResizing] = useState(false);
+  
+  const sidebarRef = useRef(null);
+
+  // Resizing Logic (Priority: Mine)
+  const startResizing = useCallback((mouseDownEvent) => {
     setIsResizing(true);
   }, []);
 
@@ -38,61 +42,35 @@ export default function ChatApp() {
     setIsResizing(false);
   }, []);
 
-  const resize = useCallback((e) => {
+  const resize = useCallback((mouseMoveEvent) => {
     if (isResizing) {
-      const newWidth = window.innerWidth - e.clientX;
-      if (newWidth >= 280 && newWidth <= 500) {
+      const minWidth = 280;
+      const maxWidth = 600;
+      const newWidth = window.innerWidth - mouseMoveEvent.clientX;
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
         setPanelWidth(newWidth);
       }
     }
   }, [isResizing]);
 
   useEffect(() => {
-    if (isResizing) {
-      window.addEventListener('mousemove', resize);
-      window.addEventListener('mouseup', stopResizing);
-    }
+    window.addEventListener("mousemove", resize);
+    window.addEventListener("mouseup", stopResizing);
     return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
     };
-  }, [isResizing, resize, stopResizing]);
-
-  const CLARIFICATION_QUESTIONS = [
-    {
-      id: 'scale',
-      question: 'What is the expected scale of your users?',
-      options: ['Low (1k - 10k)', 'Medium (100k - 500k)', 'High (1M+)', 'Global (10M+)'],
-    },
-    {
-      id: 'type',
-      question: 'What is the primary system type?',
-      options: ['Real-time / Latency sensitive', 'Batch processing', 'Hybrid', 'Static Cache heavy'],
-    },
-    {
-      id: 'priority',
-      question: 'What is your architectural priority?',
-      options: ['Scalability', 'Security', 'Cost Efficiency', 'Developer Speed'],
-    },
-    {
-      id: 'tech',
-      question: 'Do you have a specific tech preference?',
-      options: ['Cloud Native (AWS/GCP)', 'Serverless', 'On-Prem / Kubernetes', 'Managed Services'],
-    }
-  ];
+  }, [resize, stopResizing]);
 
   const activeDesign = dynamicDesign || MULTI_DESIGNS.find(d => d.id === activeTabId);
 
+  // Backend Flow (Keeping Remote Logic)
   const handleStartClarification = async (text) => {
     if (!text.trim()) return;
     setPrompt(text);
     setStep('GENERATING');
-    console.log("[Frontend] Preparing to start design session...");
-    console.log("[Frontend] Prompt:", text);
     try {
-      console.log("[Frontend] -> POST /design/start (Awaiting Gemini Clarification Questions)...");
       const res = await startDesignSession(text);
-      console.log("[Frontend] <- Received Clarification Questions:", res.questions);
       setSessionId(res.session_id);
       setDynamicQuestions(res.questions.map((q, idx) => ({
         id: `q${idx}`,
@@ -120,14 +98,8 @@ export default function ChatApp() {
 
   const handleFinalGenerate = async () => {
     setStep('GENERATING');
-    console.log("[Frontend] All questions answered!");
-    console.log("[Frontend] Session ID:", sessionId);
-    console.log("[Frontend] Answers:", answers);
     try {
-      console.log("[Frontend] -> POST /design/answer (Awaiting full Gemini Architecture Generation - This may take 15-30 seconds)...");
       const res = await answerDesignQuestions(sessionId, answers);
-      console.log("[Frontend] <- SUCCESS! Full Architecture Payload Received:");
-      console.log(res);
       const newDesign = {
         id: res.design_id,
         label: 'Gemini AI',
@@ -196,7 +168,7 @@ export default function ChatApp() {
       <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
 
         {/* ── Central design area ── */}
-        <div className="workspace-root" style={{ borderRight: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
 
           {/* ── Tab Bar (only when designs exist) ── */}
           {step === 'RESULTS' && (
@@ -248,14 +220,14 @@ export default function ChatApp() {
               <button 
                 className={`ws-panel-toggle-btn ${!isInsightsManualOpen ? 'collapsed' : ''}`}
                 onClick={() => setIsInsightsManualOpen(o => !o)}
-                style={{ right: isInsightsManualOpen ? `${panelWidth - 14}px` : '20px' }}
+                style={{ right: isInsightsManualOpen ? `${panelWidth - 16}px` : '0px' }}
               >
-                {isInsightsManualOpen ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+                {isInsightsManualOpen ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
               </button>
             )}
 
             <div className="ws-design-area">
-              <div className="ws-max-container">
+              <div className="workspace-content-wrapper">
                 <AnimatePresence mode="wait">
                   {/* ── Initial Empty State ── */}
                   {step === 'IDLE' && (
@@ -345,32 +317,30 @@ export default function ChatApp() {
                     </motion.div>
                   )}
 
-                  {/* ── Comparison View ── */}
-                  {step === 'RESULTS' && isComparison && (
-                    <motion.div
-                      key="comparison"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="ws-comparison-grid"
-                    >
-                      {MULTI_DESIGNS.map(d => (
-                        <div key={d.id} className="ws-comparison-col">
-                          <DesignCard design={d} />
-                        </div>
-                      ))}
-                    </motion.div>
-                  )}
-
-                  {/* ── Active Single Tab ── */}
-                  {step === 'RESULTS' && !isComparison && activeDesign && (
-                    <motion.div
-                      key={activeDesign.id}
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="ws-single-view"
-                    >
-                      <DesignCard design={activeDesign} />
-                    </motion.div>
+                  {/* ── Results View ── */}
+                  {step === 'RESULTS' && (
+                    <AnimatePresence mode="popLayout">
+                      {isComparison ? (
+                        <motion.div
+                          key="comparison"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="ws-comparison-grid"
+                        >
+                          {MULTI_DESIGNS.map(d => (
+                            <DesignCard key={d.id} design={d} />
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key={activeDesign?.id}
+                          initial={{ opacity: 0, x: 8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                        >
+                          <DesignCard design={activeDesign} />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   )}
                 </AnimatePresence>
               </div>
@@ -378,28 +348,33 @@ export default function ChatApp() {
           </div>
         </div>
 
-        {/* ── Insights Side Panel (Dynamic Drawer) ── */}
-        <AnimatePresence>
-          {step === 'RESULTS' && isInsightsManualOpen && (
-            <motion.div
-              initial={{ x: '100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '100%', opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="ws-insights-drawer-wrap"
-              style={{ 
-                width: `${panelWidth}px`,
-                userSelect: isResizing ? 'none' : 'auto'
-              }}
-            >
-              <div 
-                className={`ws-resizer ${isResizing ? 'active' : ''}`} 
-                onMouseDown={startResizing} 
-              />
-              <InsightsPanel design={activeDesign} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* ── Insights Side Panel (Persistent Drawer) ── */}
+        <motion.div
+          animate={{ x: (step === 'RESULTS' && isInsightsManualOpen) ? 0 : '100%' }}
+          initial={{ x: '100%' }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="right-panel"
+          style={{ 
+            width: `${panelWidth}px`,
+            userSelect: isResizing ? 'none' : 'auto',
+            display: step === 'RESULTS' ? 'flex' : 'none'
+          }}
+        >
+          <div 
+            className={`ws-resizer ${isResizing ? 'active' : ''}`} 
+            onMouseDown={startResizing} 
+          />
+          <button 
+            className={`insight-toggle ${!isInsightsManualOpen ? 'collapsed' : ''}`}
+            onClick={() => setIsInsightsManualOpen(o => !o)}
+          >
+            {isInsightsManualOpen ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+          </button>
+          
+          <div className="right-panel-body custom-scrollbar">
+            <InsightsPanel design={activeDesign} />
+          </div>
+        </motion.div>
       </div>
     </div>
   );

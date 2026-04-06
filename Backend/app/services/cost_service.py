@@ -1,5 +1,5 @@
 import json
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from app.services.ai_service import llm
 
 def estimate_cost(architecture: dict) -> dict:

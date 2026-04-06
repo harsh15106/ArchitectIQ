@@ -1,15 +1,36 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Server, Layers, Code2, GitBranch, ThumbsUp, ThumbsDown, Activity, Save, X } from 'lucide-react';
+import { Server, Layers, Code2, GitBranch, ThumbsUp, ThumbsDown, Activity, Save, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import './DesignCard.css';
 
 export default function DesignCard({ design }) {
   const mermaidRef = useRef(null);
   const [editingNode, setEditingNode] = useState(null);
-  const [zoom, setZoom] = useState(1.1);
+  const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
+
+  // Reset zoom & pan to fit the diagram into container
+  const fitToContainer = useCallback(() => {
+    if (!mermaidRef.current) return;
+    const container = mermaidRef.current.parentElement;
+    const svg = mermaidRef.current.querySelector('svg');
+    if (svg && container) {
+      // Get internal dimensions from viewBox or client sizes
+      const { width, height } = svg.viewBox.baseVal.width > 0 
+        ? { width: svg.viewBox.baseVal.width, height: svg.viewBox.baseVal.height }
+        : { width: svg.clientWidth || 800, height: svg.clientHeight || 600 };
+
+      const padding = 80;
+      const scaleX = (container.clientWidth - padding) / width;
+      const scaleY = (container.clientHeight - padding) / height;
+      const fitScale = Math.min(scaleX, scaleY, 1.2); 
+      
+      setZoom(fitScale);
+      setPan({ x: 0, y: 0 });
+    }
+  }, []);
 
   const handleMouseDown = (e) => {
     setIsPanning(true);
@@ -27,7 +48,7 @@ export default function DesignCard({ design }) {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
       const delta = e.deltaY > 0 ? 0.95 : 1.05;
-      setZoom(z => Math.min(Math.max(0.4, z * delta), 3));
+      setZoom(z => Math.min(Math.max(0.4, z * delta), 4));
     }
   };
 
@@ -64,13 +85,15 @@ export default function DesignCard({ design }) {
         const { svg } = await mermaid.render(id, design.diagram);
         mermaidRef.current.innerHTML = svg;
 
+        // Auto-fit after render
+        setTimeout(fitToContainer, 100);
+
         // Add Click Listeners to Nodes
         const nodes = mermaidRef.current.querySelectorAll('.node');
         nodes.forEach(node => {
           node.style.cursor = 'pointer';
           const label = node.querySelector('.label')?.textContent || "";
           
-          // Inject Highlight Classes
           if (label.match(/Gateway|Core|Database|Service/i)) {
             node.classList.add('highlight-node');
           }
@@ -89,7 +112,9 @@ export default function DesignCard({ design }) {
     };
 
     renderDiagram();
-  }, [design?.id, design?.diagram]);
+    window.addEventListener('resize', fitToContainer);
+    return () => window.removeEventListener('resize', fitToContainer);
+  }, [design?.id, design?.diagram, fitToContainer]);
 
   if (!design) return null;
 
@@ -117,24 +142,52 @@ export default function DesignCard({ design }) {
         {/* ── Diagram (Primary Focus) ── */}
         <section>
           <p className="dc-section-title"><GitBranch size={11} /> Architecture Diagram (Interactive)</p>
-          <div 
-            className="dc-diagram-wrap"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onWheel={handleWheel}
-            style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
-          >
+          <div className="diagram-container">
+            {/* ── Strict Diagram Controls ── */}
+            <div className="diagram-controls">
+              <button 
+                id="zoomIn"
+                onClick={(e) => { e.stopPropagation(); setZoom(z => Math.min(z + 0.1, 3)); }}
+                title="Zoom In"
+              >
+                +
+              </button>
+              <button 
+                id="zoomOut"
+                onClick={(e) => { e.stopPropagation(); setZoom(z => Math.max(0.5, z - 0.1)); }}
+                title="Zoom Out"
+              >
+                −
+              </button>
+              <button 
+                id="resetZoom"
+                onClick={(e) => { e.stopPropagation(); fitToContainer(); }}
+                title="Reset View"
+              >
+                ⟲
+              </button>
+            </div>
+
             <div 
-              className="mermaid" 
-              ref={mermaidRef} 
-              style={{ 
-                transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-                transformOrigin: 'center center',
-                transition: isPanning ? 'none' : 'transform 0.1s ease-out'
-              }}
-            />
+              className="dc-diagram-inner"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onWheel={handleWheel}
+              style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
+            >
+              <div 
+                className="mermaid" 
+                id="diagramContent"
+                ref={mermaidRef} 
+                style={{ 
+                  transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                  transformOrigin: 'center',
+                  transition: isPanning ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              />
+            </div>
             
             <AnimatePresence>
               {editingNode && (

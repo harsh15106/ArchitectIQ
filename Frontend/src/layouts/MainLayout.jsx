@@ -18,7 +18,14 @@ export default function MainLayout() {
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'Workspace';
 
   return (
-    <div className="app-container">
+    <div 
+      className={`app-container ${!isSidebarOpen ? 'sidebar-collapsed' : 'sidebar-expanded'}`}
+      style={{ 
+        '--sidebar-width': isSidebarOpen ? '240px' : '70px',
+        /* On Mobile (< 768px), sidebar is fixed overlay, so margin should be 0 */
+        ...(window.innerWidth <= 768 ? { '--sidebar-width': '0px' } : {})
+      }}
+    >
       {/* ── Global Navbar (Always Top-Level) ── */}
       <nav className="navbar">
         <div className="navbar-left">
@@ -53,6 +60,7 @@ export default function MainLayout() {
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
         <main className="main-content">

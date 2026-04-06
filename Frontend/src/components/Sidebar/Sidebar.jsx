@@ -1,13 +1,13 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Plus, History, Bookmark, Settings, 
-  Brain, Zap
+  Plus, History, Bookmark, User, 
+  Brain, Zap, Menu, X, LogOut
 } from 'lucide-react';
 import { MOCK_HISTORY } from '../../data/mockData';
 import './Sidebar.css';
 
-export default function Sidebar({ isOpen, onClose }) {
+export default function Sidebar({ isOpen, onClose, onToggle }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -15,75 +15,92 @@ export default function Sidebar({ isOpen, onClose }) {
     { icon: Zap, label: 'Workspace', path: '/app' },
     { icon: History, label: 'History', path: '/history' },
     { icon: Bookmark, label: 'Saved Designs', path: '/saved' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: User, label: 'Profile', path: '/profile' },
   ];
 
   const recentHistory = MOCK_HISTORY.slice(0, 3);
+  
+  // Dynamic user data from localStorage
+  const userData = JSON.parse(localStorage.getItem('currentUser') || '{"name": "Professional User", "role": "Pro Plan"}');
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('currentUser');
+    navigate('/login', { replace: true });
+    window.location.reload();
+  };
 
   return (
     <aside className={`sidebar ${isOpen ? 'expanded' : 'collapsed'}`}>
-      {/* ── Header ── */}
-      <div className="sidebar-header">
-        <div className="sidebar-logo">
-          <Brain size={20} strokeWidth={2.5} />
+      <div className="sidebar-top">
+        {/* ── Header ── */}
+        <div className="sidebar-header">
+          <div className="sidebar-logo">
+            <Brain size={20} strokeWidth={2.5} />
+          </div>
+          <div className="sidebar-text sidebar-brand-group">
+            <h1 className="sidebar-brand-title">ArchitectIQ</h1>
+            <p className="sidebar-brand-subtitle">AI Assistant</p>
+          </div>
         </div>
-        <div className="sidebar-text sidebar-brand-group">
-          <h1 className="sidebar-brand-title">ArchitectIQ</h1>
-          <p className="sidebar-brand-subtitle">AI Assistant</p>
-        </div>
-      </div>
 
-      {/* ── New Session ── */}
-      <div className="sidebar-menu">
-        <button
-          onClick={() => { navigate('/app'); onClose(); }}
-          className="sidebar-item sidebar-new-btn"
-          data-label="New Session"
+        {/* ── Sidebar Toggle (Internal) ── */}
+        <button 
+          className="sidebar-toggle-btn" 
+          onClick={onToggle}
+          title={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
         >
-          <Plus size={20} className="sidebar-icon" strokeWidth={3} />
-          <span className="sidebar-text">New Session</span>
+          {isOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
 
-        {/* ── primary Nav ── */}
-        {navItems.map((item) => (
-          <button
-            key={item.label}
-            onClick={() => { navigate(item.path); onClose(); }}
-            className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}
-            data-label={item.label}
-          >
-            <item.icon size={20} className="sidebar-icon" strokeWidth={2.25} />
-            <span className="sidebar-text">{item.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* ── History (Only visible when expanded) ── */}
-      <div className="sidebar-section-wrap">
-        <div className="sidebar-text sidebar-section-label">Most Recent</div>
-        <div className="sidebar-recent-list">
-          {recentHistory.map((item) => (
-            <div
-              key={item.id}
-              className="sidebar-recent-card"
-              onClick={() => { navigate('/history'); onClose(); }}
+        {/* ── New Session ── */}
+        <div className="sidebar-menu">
+          {/* ── primary Nav ── */}
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              onClick={() => { navigate(item.path); onClose(); }}
+              className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}
+              data-label={item.label}
             >
-              <span className="sidebar-text recent-title">{item.title}</span>
-            </div>
+              <item.icon size={20} className="sidebar-icon" strokeWidth={2.25} />
+              <span className="sidebar-text">{item.label}</span>
+            </button>
           ))}
         </div>
       </div>
 
-      {/* ── User ── */}
-      <footer className="sidebar-footer">
-        <div className="sidebar-user-wrap" data-label="Professional User">
-          <div className="sidebar-user-avatar">U</div>
-          <div className="sidebar-text sidebar-user-info">
-             <p className="sidebar-user-name">Professional User</p>
-             <p className="sidebar-user-plan">PRO PLAN</p>
+      <div className="sidebar-bottom">
+        {/* ── History (Only visible when expanded) ── */}
+        <div className="sidebar-section-wrap">
+          <div className="sidebar-text sidebar-section-label">Most Recent</div>
+          <div className="sidebar-recent-list">
+            {recentHistory.map((item) => (
+              <div
+                key={item.id}
+                className="sidebar-recent-card"
+                onClick={() => { navigate('/history'); onClose(); }}
+              >
+                <span className="sidebar-text recent-title">{item.title}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </footer>
+
+        {/* ── User ── */}
+        <footer className="sidebar-footer">
+          <div className="sidebar-user-wrap" data-label={userData.name}>
+            <div className="sidebar-user-avatar">{userData.name.charAt(0)}</div>
+            <div className="sidebar-text sidebar-user-info">
+               <p className="sidebar-user-name">{userData.name}</p>
+               <p className="sidebar-user-plan">{userData.role || 'PRO PLAN'}</p>
+            </div>
+          </div>
+          <button className="sidebar-logout-icon-btn" onClick={handleLogout} title="Logout">
+            <LogOut size={16} />
+          </button>
+        </footer>
+      </div>
     </aside>
   );
 }

@@ -148,25 +148,81 @@
   border-radius: 4px;
 }
 
-/* ── Diagram area (Premium Gold Edition) ── */
-.dc-diagram-wrap {
-  padding: 16px;
+/* ── Strict Diagram Container (Centered & Filling) ── */
+.diagram-container {
+  width: 100%;
+  height: 600px;
   background-color: #050508;
   border: 1px solid var(--border);
-  border-radius: 20px;
-  overflow: hidden; /* Handled by JS Pan/Zoom */
+  border-radius: 16px;
+  overflow: hidden; 
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 700px; /* Dominant & Immersive */
   position: relative;
   transition: all 0.3s ease;
   user-select: none;
 }
 
-.dc-diagram-wrap:hover {
-  border-color: rgba(212, 175, 55, 0.3);
-  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.05);
+.dc-diagram-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#diagramContent {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  transform-origin: center;
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+/* ── Critical Mermaid SVG Override ── */
+.mermaid svg {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Strict Diagram Controls Overlay ── */
+.diagram-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.diagram-controls button {
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #E5E7EB;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.diagram-controls button:hover {
+  background: #1A1A1A;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ── High-Fidelity Node Interactions ── */
@@ -259,32 +315,74 @@
   gap: 12px;
 }
 
-/* ── Pros/Cons ── */
+/* ── Trade-offs (Pros/Cons) ── */
 .dc-pros-cons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
+  gap: 20px;
+  margin-top: 20px;
 }
 
 .dc-pros-col, .dc-cons-col {
-  padding: var(--space-6);
-  border-radius: var(--radius-md);
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+  padding: 24px;
+  border-radius: 16px;
+  background-color: #0F0F0F;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  height: auto;
+  min-height: auto; /* IMPORTANT: Allow content to define height */
+  transition: transform 0.2s;
 }
 
-.dc-pros-title { color: var(--success); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-4); }
-.dc-cons-title { color: var(--error); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-4); }
+.dc-pros-col:hover, .dc-cons-col:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.dc-pros-title { 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--success); 
+  font-size: 0.75rem; 
+  font-weight: 800; 
+  text-transform: uppercase; 
+  letter-spacing: 0.1em; 
+  margin-bottom: 20px; 
+}
+
+.dc-cons-title { 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--error); 
+  font-size: 0.75rem; 
+  font-weight: 800; 
+  text-transform: uppercase; 
+  letter-spacing: 0.1em; 
+  margin-bottom: 20px; 
+}
 
 .dc-pc-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: #9CA3AF;
   line-height: 1.6;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
-.dc-pc-dot-green { width: 5px; height: 5px; border-radius: 999px; background: var(--success); flex-shrink: 0; margin-top: 10px; }
-.dc-pc-dot-red { width: 5px; height: 5px; border-radius: 999px; background: var(--error); flex-shrink: 0; margin-top: 10px; }
+.dc-pc-item:last-child {
+  margin-bottom: 0;
+}
+
+.dc-pc-dot-green { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; margin-top: 9px; box-shadow: 0 0 8px var(--success-soft); }
+.dc-pc-dot-red { width: 6px; height: 6px; border-radius: 50%; background: var(--error); flex-shrink: 0; margin-top: 9px; box-shadow: 0 0 8px var(--error-soft); }
+
+/* Responsive Trade-offs */
+@media (max-width: 1024px) {
+  .dc-pros-cons {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

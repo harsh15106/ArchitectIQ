@@ -354,3 +354,25 @@ export const MULTI_DESIGNS = [
 ];
 
 export const DESIGN_SCORES_LABELS = ['Scalability', 'Performance', 'Security', 'Reliability', 'Maintainability'];
+
+export const CLARIFICATION_QUESTIONS = [
+  {
+    question: "What is your target user base for the initial launch?",
+    options: ["< 10k users", "100k - 1M users", "1M+ users (High Scale)", "Internal team only"]
+  },
+  {
+    question: "Which aspect is most critical for your application?",
+    options: ["Low Latency", "Strong Consistency", "Highest Availability", "Cost Efficiency"]
+  },
+  {
+    question: "What is your preferred primary database type?",
+    options: ["Relational (PostgreSQL/MySQL)", "NoSQL (MongoDB/DynamoDB)", "NewSQL (CockroachDB)", "Not sure, need suggestion"]
+  }
+];
+
+export const EXAMPLE_PROMPTS = [
+  "Build a real-time food delivery app like UberEats",
+  "Design a global video streaming platform like Netflix",
+  "Create a secure payment gateway for a high-traffic e-commerce store",
+  "Architect a distributed social media feed with sub-second latency"
+];

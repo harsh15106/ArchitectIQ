@@ -1,5 +1,10 @@
 from app.config import settings
-from pinecone import Pinecone, ServerlessSpec
+try:
+    from pinecone import Pinecone, ServerlessSpec
+except Exception as e:
+    print(f"Warning: Pinecone SDK import failed: {e}")
+    Pinecone = None
+    ServerlessSpec = None
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import time
 

@@ -2,7 +2,7 @@ import json
 import re
 from io import BytesIO
 from reportlab.pdfgen import canvas
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from app.services.ai_service import llm
 
 def to_pdf(design: dict) -> bytes:
