@@ -33,29 +33,56 @@ export default function AuthPage({ initialMode = 'login' }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    if (mode === 'signup' && formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
+    // Explicit validation before sending to backend
+    if (mode === 'signup') {
+      if (!formData.name.trim()) {
+        setError('Please enter your full name');
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.password.trim()) {
+        setError('Password cannot be blank');
+        setIsLoading(false);
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        setIsLoading(false);
+        return;
+      }
+    } else {
+      if (!formData.email.trim() || !formData.password.trim()) {
+        setError('Email and password are required');
+        setIsLoading(false);
+        return;
+      }
     }
 
     try {
       if (mode === 'login') {
         await login(formData.email, formData.password);
       } else {
-        await register(formData.name || 'AI Architect', formData.email, formData.password, formData.role);
+        await register(
+          formData.name.trim(), 
+          formData.email.trim(), 
+          formData.password, 
+          formData.role
+        );
       }
       
       navigate('/app', { replace: true });
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      console.error("Auth error:", err);
+      // Ensure we display the actual error from the backend if available
+      setError(err.message || 'Authentication failed. Please try again.');
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page" id="auth-page-container">
       <div className="auth-ambient">
         <div className="auth-orb auth-orb-1" />
         <div className="auth-orb auth-orb-2" />
@@ -110,6 +137,7 @@ export default function AuthPage({ initialMode = 'login' }) {
                   <input 
                     type="text" 
                     name="name"
+                    id="signup-name-input"
                     required 
                     placeholder="Enter your name" 
                     value={formData.name}
@@ -138,6 +166,7 @@ export default function AuthPage({ initialMode = 'login' }) {
             <input 
               type="email" 
               name="email"
+              id="auth-email-input"
               required 
               placeholder="name@company.com" 
               value={formData.email}
@@ -151,6 +180,7 @@ export default function AuthPage({ initialMode = 'login' }) {
               <input 
                 type={showPassword ? "text" : "password"} 
                 name="password"
+                id="auth-password-input"
                 required 
                 placeholder="••••••••" 
                 value={formData.password}
@@ -173,6 +203,7 @@ export default function AuthPage({ initialMode = 'login' }) {
                 <input 
                   type={showConfirmPassword ? "text" : "password"} 
                   name="confirmPassword"
+                  id="signup-confirm-password-input"
                   required 
                   placeholder="Confirm password" 
                   value={formData.confirmPassword}

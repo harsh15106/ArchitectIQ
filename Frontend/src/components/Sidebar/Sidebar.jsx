@@ -34,8 +34,8 @@ export default function Sidebar({ isOpen, onClose, onToggle }) {
       <div className="sidebar-top">
         {/* ── Header ── */}
         <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <Brain size={20} strokeWidth={2.5} />
+          <div className="sidebar-logo" id="sidebar-top-logo">
+            <img src="/Logo.png" alt="ArchitectIQ Logo" className="sidebar-logo-img" />
           </div>
           <div className="sidebar-text sidebar-brand-group">
             <h1 className="sidebar-brand-title">ArchitectIQ</h1>
@@ -91,8 +91,9 @@ export default function Sidebar({ isOpen, onClose, onToggle }) {
           <div className="sidebar-user-wrap" data-label={userData.name}>
             <div className="sidebar-user-avatar">{userData.name.charAt(0)}</div>
             <div className="sidebar-text sidebar-user-info">
-               <p className="sidebar-user-name">{userData.name}</p>
-               <p className="sidebar-user-plan">{userData.role || 'PRO PLAN'}</p>
+               <p className="sidebar-user-name" id="sidebar-display-name">{userData.name}</p>
+               <p className="sidebar-user-email" id="sidebar-display-email" style={{ fontSize: '11px', opacity: 0.6 }}>{userData.email || ''}</p>
+               <div className="sidebar-user-plan" id="sidebar-display-role">{userData.role || 'AI Architect'}</div>
             </div>
           </div>
           <button className="sidebar-logout-icon-btn" onClick={handleLogout} title="Logout">
