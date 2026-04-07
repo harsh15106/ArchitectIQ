@@ -16,18 +16,8 @@ router = APIRouter()
 
 @router.get("/models")
 async def list_available_models():
-    import google.generativeai as genai
-    from app.config import settings
-    genai.configure(api_key=settings.GEMINI_API_KEY)
-    
-    models = []
-    try:
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                models.append(m.name)
-        return {"available_models": models}
-    except Exception as e:
-        return {"error": str(e)}
+    # Vertex AI models are structured differently, returning standard list
+    return {"available_models": ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash", "gemini-1.5-pro"]}
 
 @router.post("/start")
 async def start_design(req: SessionStart, current_user: dict = Depends(get_current_user)):

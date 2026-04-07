@@ -1,8 +1,11 @@
+"""Architecture validation service for security and scalability analysis."""
+
 import json
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.services.ai_service import llm
 
 def validate(architecture: dict) -> dict:
+    """Validate an architecture for missing components, security, and scalability."""
     if not llm:
         return {
             "missing_components": ["Load Balancer", "Caching Layer"],
@@ -17,7 +20,7 @@ def validate(architecture: dict) -> dict:
     prompt = f"Analyze this Architecture:\n{json.dumps(architecture)}"
     
     try:
-        response = llm([sys_msg, HumanMessage(content=prompt)])
+        response = llm.invoke([sys_msg, HumanMessage(content=prompt)])
         data = response.content.strip()
         if data.startswith("```json"):
             data = data.strip("`").replace("json\n", "")

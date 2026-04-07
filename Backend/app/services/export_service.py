@@ -1,3 +1,5 @@
+"""Export service for generating PDF, Terraform, and CloudFormation outputs."""
+
 import json
 import re
 from io import BytesIO
@@ -6,6 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from app.services.ai_service import llm
 
 def to_pdf(design: dict) -> bytes:
+    """Generate a PDF report from a design document."""
     buffer = BytesIO()
     c = canvas.Canvas(buffer)
     c.drawString(100, 800, "ArchitectIQ - System Design Report")
@@ -16,6 +19,7 @@ def to_pdf(design: dict) -> bytes:
     return buffer.getvalue()
 
 def strip_markdown(text: str, lang: str) -> str:
+    """Strip markdown code fences for a specific language tag."""
     text = text.strip()
     pattern = rf"^```{lang}\s*(.*?)\s*```$"
     match = re.search(pattern, text, re.DOTALL)
@@ -26,6 +30,7 @@ def strip_markdown(text: str, lang: str) -> str:
     return text
 
 def to_terraform(architecture: dict) -> str:
+    """Convert an architecture to Terraform HCL code via Gemini."""
     if not llm:
         return "# Error: AI LLM is not initialized for Terraform generation."
         
@@ -33,13 +38,14 @@ def to_terraform(architecture: dict) -> str:
     prompt = f"Convert this architecture to Terraform:\n{json.dumps(architecture)}"
     
     try:
-        response = llm([sys_msg, HumanMessage(content=prompt)])
+        response = llm.invoke([sys_msg, HumanMessage(content=prompt)])
         return strip_markdown(response.content, "hcl") or strip_markdown(response.content, "terraform")
     except Exception as e:
         print(f"Terraform Generation Error: {e}")
         return "# Error generating Terraform. Check backend logs."
 
 def to_cloudformation(architecture: dict) -> str:
+    """Convert an architecture to AWS CloudFormation YAML via Gemini."""
     if not llm:
         return "Error: AI LLM is not initialized for CloudFormation generation."
         
@@ -47,7 +53,7 @@ def to_cloudformation(architecture: dict) -> str:
     prompt = f"Convert this architecture to CloudFormation YAML:\n{json.dumps(architecture)}"
     
     try:
-        response = llm([sys_msg, HumanMessage(content=prompt)])
+        response = llm.invoke([sys_msg, HumanMessage(content=prompt)])
         return strip_markdown(response.content, "yaml")
     except Exception as e:
         print(f"CloudFormation Generation Error: {e}")

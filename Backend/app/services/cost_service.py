@@ -1,8 +1,11 @@
+"""Cost estimation service using Vertex AI Gemini."""
+
 import json
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.services.ai_service import llm
 
 def estimate_cost(architecture: dict) -> dict:
+    """Estimate monthly cloud infrastructure costs for the given architecture."""
     if not llm:
         return {
             "itemized": [{"name": "Fallback compute", "type": "EC2", "monthly_cost": 20}],
@@ -14,7 +17,7 @@ def estimate_cost(architecture: dict) -> dict:
     prompt = f"Architecture:\n{json.dumps(architecture)}"
     
     try:
-        response = llm([sys_msg, HumanMessage(content=prompt)])
+        response = llm.invoke([sys_msg, HumanMessage(content=prompt)])
         data = response.content.strip()
         if data.startswith("```json"):
             data = data.strip("`").replace("json\n", "")

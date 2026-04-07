@@ -57,10 +57,20 @@ export default function DesignCard({ design }) {
 
     const renderDiagram = async () => {
       try {
+        const diagramSource = design.diagram;
+        console.log('[DesignCard] diagram type:', typeof diagramSource, 'length:', diagramSource?.length);
+        console.log('[DesignCard] diagram preview:', String(diagramSource).substring(0, 200));
+
+        if (!diagramSource || typeof diagramSource !== 'string' || diagramSource.trim().length === 0) {
+          mermaidRef.current.innerHTML = '<p style="color:var(--text-muted);font-size:0.75rem;text-align:center">No diagram data received from server</p>';
+          return;
+        }
+
         const mermaid = (await import('mermaid')).default;
         mermaid.initialize({
           startOnLoad: false,
           theme: 'dark',
+          securityLevel: 'loose',
           themeVariables: {
             darkMode: true,
             background: '#050508',
@@ -82,7 +92,7 @@ export default function DesignCard({ design }) {
         const id = `mermaid-${design.id}-${Date.now()}`;
         mermaidRef.current.removeAttribute('data-processed');
         mermaidRef.current.innerHTML = '';
-        const { svg } = await mermaid.render(id, design.diagram);
+        const { svg } = await mermaid.render(id, diagramSource);
         mermaidRef.current.innerHTML = svg;
 
         // Auto-fit after render
@@ -105,6 +115,8 @@ export default function DesignCard({ design }) {
         });
 
       } catch (e) {
+        console.error('[DesignCard] Mermaid render error:', e.message);
+        console.error('[DesignCard] Diagram source was:', design.diagram);
         if (mermaidRef.current) {
           mermaidRef.current.innerHTML = '<p style="color:var(--text-muted);font-size:0.75rem;text-align:center">Diagram unavailable</p>';
         }

@@ -1,21 +1,30 @@
+"""RAG service using Pinecone vector store and Vertex AI embeddings."""
+
 from app.config import settings
+import os
 try:
     from pinecone import Pinecone, ServerlessSpec
 except Exception as e:
     print(f"Warning: Pinecone SDK import failed: {e}")
     Pinecone = None
     ServerlessSpec = None
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_google_vertexai import VertexAIEmbeddings
 import time
+
+EMBEDDING_DIMENSION = 768
+METADATA_TEXT_LIMIT = 1000
+DEFAULT_TOP_K = 5
 
 pc = None
 index = None
 embeddings = None
 
+
 def init_pinecone():
+    """Initialize the Pinecone vector index and Vertex AI embedding model."""
     global pc, index, embeddings
     if not settings.PINECONE_API_KEY or settings.PINECONE_API_KEY == "dummy":
-        print("Pinecone API key not provided, skipping init.")
+        print("[RAG] Pinecone API key not provided, skipping init.")
         return
 
     try:
@@ -25,26 +34,35 @@ def init_pinecone():
         existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
 
         if index_name not in existing_indexes:
-            print(f"Creating Pinecone index '{index_name}'...")
+            print(f"[RAG] Creating Pinecone index '{index_name}'...")
             pc.create_index(
                 name=index_name,
-                dimension=768,
+                dimension=EMBEDDING_DIMENSION,
                 metric="cosine",
                 spec=ServerlessSpec(cloud="aws", region="us-east-1")
             )
+            # TODO: review this — polling with time.sleep inside a loop
             while not pc.describe_index(index_name).status["ready"]:
                 time.sleep(1)
 
         index = pc.Index(index_name)
-        embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/embedding-001",
-            google_api_key=settings.GEMINI_API_KEY
-        )
-        print(f"Pinecone index '{index_name}' initialized.")
+
+        # Only init embeddings if GCP credentials are available
+        creds_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
+        if os.path.exists(creds_path):
+            embeddings = VertexAIEmbeddings(
+                model_name="text-embedding-004",
+                project=settings.GCP_PROJECT_ID
+            )
+            print(f"[RAG] Pinecone index '{index_name}' initialized with Vertex AI embeddings.")
+        else:
+            print(f"[RAG] Pinecone index '{index_name}' initialized WITHOUT embeddings (no GCP credentials).")
     except Exception as e:
-        print(f"Failed to initialize Pinecone: {e}")
+        print(f"[RAG] Failed to initialize Pinecone: {e}")
+
 
 def store_embedding(design_id: str, text: str):
+    """Store a design's text embedding in the Pinecone vector index."""
     if not index or not embeddings:
         return
     try:
@@ -52,12 +70,14 @@ def store_embedding(design_id: str, text: str):
         index.upsert(vectors=[{
             "id": str(design_id),
             "values": vector,
-            "metadata": {"text": text}
+            "metadata": {"text": text[:METADATA_TEXT_LIMIT]}
         }])
     except Exception as e:
-        print(f"Error storing embedding: {e}")
+        print(f"[RAG] Error storing embedding: {e}")
 
-def retrieve_context(query: str, top_k: int = 5) -> str:
+
+def retrieve_context(query: str, top_k: int = DEFAULT_TOP_K) -> str:
+    """Retrieve relevant design context from the Pinecone vector store."""
     if not index or not embeddings:
         return "Follow microservices patterns. Ensure high availability. Use caching."
     try:
@@ -68,5 +88,5 @@ def retrieve_context(query: str, top_k: int = 5) -> str:
             return "No historical context found."
         return "\n---\n".join(contexts)
     except Exception as e:
-        print(f"Error retrieving context: {e}")
+        print(f"[RAG] Error retrieving context: {e}")
         return "Error fetching context. Default to standard patterns."

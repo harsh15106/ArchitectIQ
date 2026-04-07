@@ -5,6 +5,8 @@
 .env.example
 Backend/.env
 Backend/.env.example
+Backend/google-credentials.json
+*.log
 
 # Dependencies
 node_modules/
