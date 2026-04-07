@@ -15,6 +15,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+ 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to ArchitectIQ API - Backend is running!"}
 
 @app.on_event("startup")
 async def startup_event():

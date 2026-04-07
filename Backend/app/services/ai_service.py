@@ -11,16 +11,23 @@ except Exception as e:
 
 def generate_clarifying_questions(problem_statement: str):
     if not llm:
-        return ["What is your target scale?", "Any compliance requirements?", "Which cloud provider do you prefer?"]
+        return [
+            {"question": "What is your target scale?", "options": ["Small (< 1k users)", "Medium (10k+ users)", "Large (1M+ users)", "Undetermined"]},
+            {"question": "Any compliance requirements?", "options": ["HIPAA", "GDPR", "None", "All standard"]},
+            {"question": "Cloud provider preference?", "options": ["AWS", "Azure", "GCP", "No preference"]}
+        ]
     
-    prompt = f"Given this problem statement: '{problem_statement}', return exactly 3 to 5 clarifying questions to design the architecture. Return ONLY a valid JSON array of strings, nothing else."
+    prompt = f"Given this problem statement: '{problem_statement}', return exactly 3 to 5 clarifying questions for system architecture. For each question, provide 3 multiple-choice options. Return ONLY a valid JSON array of objects with 'question' and 'options' keys."
     
     try:
         response = llm([HumanMessage(content=prompt)])
         return json.loads(response.content)
     except Exception as e:
-        print(f"Gemini API Error (Check API Key): {e}")
-        return ["(API Key Error) What is your target scale?", "(API Key Error) Any compliance requirements?", "(API Key Error) Which cloud provider do you prefer?"]
+        print(f"Gemini API Error: {e}")
+        return [
+            {"question": "Which scale do you anticipate?", "options": ["Micro", "SaaS", "Enterprise"]},
+            {"question": "Any data sensitivity?", "options": ["Low", "High", "Critical"]}
+        ]
 
 def generate_architecture(problem_statement: str, answers: list, rag_context: str):
     if not llm:

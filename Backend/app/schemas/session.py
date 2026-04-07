@@ -6,4 +6,4 @@ class SessionStart(BaseModel):
 
 class SessionAnswer(BaseModel):
     session_id: str
-    answers: List[Dict[str, str]]
+    answers: List[str]

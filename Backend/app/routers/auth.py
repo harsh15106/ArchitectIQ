@@ -9,20 +9,26 @@ router = APIRouter()
 
 @router.post("/register", response_model=Token)
 async def register(user: UserRegister):
-    existing = await db.users.find_one({"email": user.email})
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    hashed = hash_password(user.password)
-    user_doc = UserModel(name=user.name, email=user.email, hashed_password=hashed, role=user.role)
-    res = await db.users.insert_one(user_doc.dict(by_alias=True, exclude_none=True))
-    
-    user_id = str(res.inserted_id)
-    payload = {"sub": user_id, "email": user.email, "name": user.name, "role": user.role}
-    access_token = create_access_token(payload)
-    refresh_token = create_refresh_token(payload)
-    
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+    try:
+        existing = await db.users.find_one({"email": user.email})
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        hashed = hash_password(user.password)
+        user_doc = UserModel(name=user.name, email=user.email, hashed_password=hashed, role=user.role)
+        res = await db.users.insert_one(user_doc.dict(by_alias=True, exclude_none=True))
+        
+        user_id = str(res.inserted_id)
+        payload = {"sub": user_id, "email": user.email, "name": user.name, "role": user.role}
+        access_token = create_access_token(payload)
+        refresh_token = create_refresh_token(payload)
+        
+        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        print(f"Registration error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error during registration")
 
 @router.post("/login", response_model=Token)
 async def login(user: UserLogin):
