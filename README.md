@@ -8,12 +8,27 @@ A professional platform for automated architectural design and distributed syste
 
 ArchitectIQ is an advanced Computer-Aided Design (CAD) platform engineered for software architecture. It leverages Large Language Models (LLMs) and Retrieval-Augmented Generation (RAG) to automate the generation, visualization, and stress-testing of complex distributed systems. By bridging the gap between computational requirements and technical implementations, ArchitectIQ minimizes architectural drift and identifies structural bottlenecks prior to deployment.
 
+![Architecture Diagram](assets/screenshot-1.png)
+
 ## Core Capabilities
 
 * **Generative Blueprinting:** Transforms high-level functional requirements into multi-tier system diagrams using Mermaid.js syntax rendering.
+  
+  ![Component View](assets/screenshot-2.png)
+  <br>
+  ![Edit Component](assets/screenshot-6.png)
+
 * **Automated Architectural Critique:** An adversarial AI agent evaluates architectures against standard anti-patterns, identifying single points of failure and latency bottlenecks.
+  
+  <div style="display: flex; gap: 10px;">
+    <img src="assets/screenshot-5.png" alt="AI Audit Log" width="48%">
+    <img src="assets/screenshot-4.png" alt="Optimization Path" width="48%">
+  </div>
+
 * **Context-Aware Semantic Memory:** Utilizes vector indexing to maintain architectural consistency and cross-reference authoritative design patterns.
 * **Constraint Validation Engine:** Real-time auditing of security protocols, data persistence strategies, and projected scaling costs.
+  
+  ![Cost Estimate](assets/screenshot-3.png)
 * **Identity & Access Management:** Enterprise-grade authentication utilizing JSON Web Tokens (JWT) encrypted with Bcrypt.
 
 ---
