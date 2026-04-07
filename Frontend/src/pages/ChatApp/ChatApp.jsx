@@ -72,10 +72,10 @@ export default function ChatApp() {
     try {
       const res = await startDesignSession(text);
       setSessionId(res.session_id);
-      setDynamicQuestions(res.questions.map((q, idx) => ({
+      setDynamicQuestions(res.questions.map((qObj, idx) => ({
         id: `q${idx}`,
-        question: q,
-        options: ['Yes', 'No', 'Medium scale', 'High availability required'] 
+        question: typeof qObj === 'string' ? qObj : qObj.question,
+        options: qObj.options || ['Yes', 'No', 'Standard', 'Pro'] 
       })));
       setStep('CLARIFY');
       setCurrentQuestionIndex(0);

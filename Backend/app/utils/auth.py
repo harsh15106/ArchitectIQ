@@ -11,10 +11,18 @@ security = HTTPBearer(auto_error=False)
 
 
 def hash_password(password: str) -> str:
+<<<<<<< HEAD
     """Hash a plaintext password using bcrypt."""
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
+=======
+    if not password or not password.strip():
+        raise ValueError("Password cannot be blank")
+    # Truncate to 72 bytes for bcrypt compatibility
+    safe_password = password.encode('utf-8')[:72].decode('utf-8', 'ignore')
+    return pwd_context.hash(safe_password)
+>>>>>>> origin/main
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plaintext password against its bcrypt hash."""

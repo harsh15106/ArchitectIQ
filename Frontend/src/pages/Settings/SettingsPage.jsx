@@ -2,33 +2,33 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Edit2, X, Save, User, Mail, Briefcase } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './SettingsPage.css';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState({
-    name: 'Professional User',
-    email: 'user@architect-iq.com',
-    id: 'USER-82910',
-    role: 'AI Architect'
-  });
+  const { user, logout } = useAuth();
+  
+  // Use user data from AuthContext with fallbacks
+  const activeUser = user || { 
+    name: 'Authorized Guest', 
+    email: 'guest@architect-iq.com', 
+    id: 'GUEST-001', 
+    role: 'AI Architect' 
+  };
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ ...user });
+  const [editForm, setEditForm] = useState({ ...activeUser });
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      setEditForm(JSON.parse(savedUser));
+    if (user) {
+      setEditForm({ ...user });
     }
-  }, []);
+  }, [user]);
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('currentUser');
-    navigate('/login');
-    window.location.reload(); // Force app re-check
+    logout();
+    navigate('/login', { replace: true });
   };
 
   const handleSave = () => {
@@ -47,20 +47,20 @@ export default function SettingsPage() {
       >
         <div className="profile-header">PROFILE</div>
 
-        <div className="avatar">
-          {user.name.charAt(0)}
+        <div className="avatar" id="profile-avatar-circle">
+          {activeUser.name ? activeUser.name.charAt(0) : 'U'}
         </div>
 
         <div className="profile-details">
-          <div className="profile-name">{user.name}</div>
-          <div className="profile-email">{user.email}</div>
-          <div className="profile-role-badge">{user.role}</div>
+          <div className="profile-name" id="profile-display-name">{activeUser.name}</div>
+          <div className="profile-email" id="profile-display-email">{activeUser.email}</div>
+          <div className="profile-role-badge" id="profile-display-role">{activeUser.role}</div>
         </div>
 
         <div className="divider" />
 
         <div className="profile-id-section">
-          <div className="profile-id">{user.id}</div>
+          <div className="profile-id" id="profile-display-id">{activeUser.id || 'N/A'}</div>
         </div>
 
         <div className="profile-actions">
